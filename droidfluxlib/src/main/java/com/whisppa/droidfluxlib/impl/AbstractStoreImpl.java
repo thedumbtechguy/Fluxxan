@@ -48,6 +48,8 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
         if(mActionMap.containsKey(payload.Type)) {
             Method method;
             method = this.getClass().getMethod(mActionMap.get(payload.Type), Payload.class);
+
+            //TODO: this should be forced to run on the UI thread
             method.invoke(this, payload);
 
             return true;

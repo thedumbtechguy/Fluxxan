@@ -55,6 +55,9 @@ public class DispatcherImpl implements Dispatcher {
         mCurrentActionType = payload.Type;
         mWaitingToDispatch = new HashSet(mStores.keySet());
 
+
+        //TODO: Still wondering if this should be run on a separate thread.
+        //Will be able to tell after more testing is done and we notice performance is being impacted
         try {
             mIsDispatching.set(true);
             doDispatchLoop(payload);
