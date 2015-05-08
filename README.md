@@ -50,7 +50,7 @@ A store can take listeners of type `StoreListener` which it notifies of changes 
 
 A payload will usually maybe carry some data which a Store will use. E.g. A user ID which the store will use in retrieving data from it's backing store. A payload can actually contain the user data which the Store will simply set as state. More examples to come soon.
 
-Stores cannot be asynchronous by nature and must return immediately. Any Asynchronous activity must be done in the `Action`.
+Stores cannot be asynchronous by nature and must return immediately. Any Asynchronous activity must be done in the `Action`. Also, the handler method will be run on the UI thread and therefore should return as quickly as possible.
 
     public class MyStore extends AbstractStoreImpl<String> {
         String user = "User: Default";
