@@ -15,6 +15,7 @@ public class MainActivity extends ActionBarActivity implements StoreListener {
 
     private Button btn;
     private TextView txt;
+    private Button asyncBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,12 +23,20 @@ public class MainActivity extends ActionBarActivity implements StoreListener {
         setContentView(R.layout.activity_main);
 
         btn = (Button) findViewById(R.id.btn);
+        asyncBtn = (Button) findViewById(R.id.asyncBtn);
         txt = (TextView) findViewById(R.id.txt);
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MyApp.getFlux().getActions().getUsers();
+                MyApp.getFlux().getActions().getUser();
+            }
+        });
+
+        asyncBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MyApp.getFlux().getActions().getUserAsync();
             }
         });
     }
