@@ -13,7 +13,17 @@ I currently need help in the following aspects:
 Until that is done, I won't be releasing it on Maven/JCenter.
 
 ### Version
-0.0.1
+0.0.2
+
+
+### ChangeLog
+
+####0.0.2
+Notify store listeners on the UI thread
+
+####0.0.1
+Initial Code Commit
+
 
 ### Installation
 
