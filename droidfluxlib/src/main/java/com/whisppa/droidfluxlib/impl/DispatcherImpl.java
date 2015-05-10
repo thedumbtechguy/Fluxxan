@@ -1,10 +1,13 @@
 package com.whisppa.droidfluxlib.impl;
 
+import android.os.AsyncTask;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.whisppa.droidfluxlib.Callback;
+import com.whisppa.droidfluxlib.DispatchExceptionListener;
 import com.whisppa.droidfluxlib.Dispatcher;
 import com.whisppa.droidfluxlib.Payload;
 import com.whisppa.droidfluxlib.Store;
@@ -38,6 +41,10 @@ public class DispatcherImpl implements Dispatcher {
     }
 
     public synchronized void dispatch(@NonNull Payload payload) throws Exception {
+        dispatch(payload, null);
+    }
+
+    public synchronized void dispatch(@NonNull final Payload payload, DispatchExceptionListener dispatchExceptionListener) throws Exception {
         if (payload == null || TextUtils.isEmpty(payload.Type)) {
             throw new Exception("Can only dispatch actions with a 'type' property");
         }
@@ -55,16 +62,51 @@ public class DispatcherImpl implements Dispatcher {
         mCurrentActionType = payload.Type;
         mWaitingToDispatch = new HashSet(mStores.keySet());
 
+        //set a default exception listener
+        if(dispatchExceptionListener == null) {
+            dispatchExceptionListener = new DispatchExceptionListener() {
+                @Override
+                public void onException(Exception e) {
+                    Log.e(TAG, "A dispatch exception occurred", e);
+                }
+            };
+        }
+        final DispatchExceptionListener _dispatchExceptionListener = dispatchExceptionListener;
+
 
         //TODO: Still wondering if this should be run on a separate thread.
         //Will be able to tell after more testing is done and we notice performance is being impacted
-        try {
-            mIsDispatching.set(true);
-            doDispatchLoop(payload);
-        }
-        finally {
-            mCurrentActionType = null;
-            mIsDispatching.set(false);
+
+
+        mIsDispatching.set(true);
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        doDispatchLoop(payload);
+                    }
+                    catch (Exception e) {
+                        _dispatchExceptionListener.onException(e);
+                    }
+                    finally {
+                        mCurrentActionType = null;
+                        mIsDispatching.set(false);
+                    }
+                }
+            }).start();
+        } else {
+            // we are not on the UI thread, so no need wasting another thread
+            try {
+                doDispatchLoop(payload);
+            }
+            catch (Exception e) {
+                dispatchExceptionListener.onException(e);
+            }
+            finally {
+                mCurrentActionType = null;
+                mIsDispatching.set(false);
+            }
         }
     }
 
