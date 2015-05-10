@@ -1,5 +1,7 @@
 package com.whisppa.droidfluxlib.impl;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.whisppa.droidfluxlib.Callback;
@@ -77,18 +79,22 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
 
     @Override
     public void notifyListeners() {
-        synchronized (mListeners) {
-            Iterator<StoreListener> it = mListeners.iterator(); // Must be in synchronized block
-            while (it.hasNext()) {
-                try {
-                    it.next().onChanged();
-                }
-                catch (Exception e) {
-                    Log.e(TAG, "Unexpected exception during notifyAll", e);
-                    throw e;
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mListeners) {
+                    Iterator<StoreListener> it = mListeners.iterator(); // Must be in synchronized block
+                    while (it.hasNext()) {
+                        try {
+                            it.next().onChanged();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Unexpected exception during notifyAll", e);
+                            throw e;//no idea what this will do
+                        }
+                    }
                 }
             }
-        }
+        });
     }
 
     @Override

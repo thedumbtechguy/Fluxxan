@@ -30,5 +30,7 @@ public interface Store<State> {
 
     public boolean addListener(StoreListener storeListener);
     public void removeListener(StoreListener storeListener);
+
+    //ensure that this notifies the listeners from the UI thread since it can be called from any thread
     public void notifyListeners();
 }
