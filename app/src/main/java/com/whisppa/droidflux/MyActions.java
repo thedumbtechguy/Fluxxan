@@ -29,7 +29,7 @@ public class MyActions extends AbstractActionsImpl {
             mDispatcher.dispatch(new Payload(GET_USER_ASYNC_LOADING, new Bundle()));
 
             //fetch the actual data
-            Thread thread = new Thread(new Runnable(){
+            new Thread(new Runnable(){
                 @Override
                 public void run(){
                     try {
@@ -41,8 +41,7 @@ public class MyActions extends AbstractActionsImpl {
                         e.printStackTrace();
                     }
                 }
-            });
-            thread.start();
+            }).start();
         } catch (Exception e) {
             e.printStackTrace();
         }
