@@ -1,6 +1,7 @@
 package com.whisppa.droidflux;
 
 import com.whisppa.droidfluxlib.Dispatcher;
+import com.whisppa.droidfluxlib.Flux;
 import com.whisppa.droidfluxlib.Payload;
 import com.whisppa.droidfluxlib.impl.AbstractStoreImpl;
 
@@ -29,6 +30,11 @@ public class MyStore extends AbstractStoreImpl<String> {
     @Override
     public String getState() {
         return user;
+    }
+
+    @Override
+    public Flux getFlux() {
+        return MyApp.getFlux();
     }
 
 }

@@ -23,7 +23,9 @@ public interface Store<State> {
 
     public Callback getWaitCallback();
     public void waitFor(String[] storeNames, Callback callback)  throws Exception;
+
     public State getState();
+    public Flux getFlux();
 
 
     public boolean addListener(StoreListener storeListener);
