@@ -14,7 +14,7 @@ public class MyApp extends Application {
 
     @Override
     public void onCreate() {
-        FluxDroid = new Flux<MyActions>(new Store[]{new MyStore()}, new MyActions());
+        FluxDroid = new Flux<MyActions>(new Store[]{new MyStore(), new MyOtherStore()}, new MyActions());
     }
 
     public static Flux<MyActions> getFlux() {
