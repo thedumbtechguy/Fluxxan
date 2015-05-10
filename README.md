@@ -1,6 +1,6 @@
-# FluxDroid
+# DroidFlux
 
-FluxDroid is an Android port of the popular [Fluxxor](http://fluxxor.com) library that seeks to implement the [Flux Architecture](https://facebook.github.io/flux/) as popularised by Facebook.
+DroidFlux is an Android port of the popular [Fluxxor](http://fluxxor.com) library that seeks to implement the [Flux Architecture](https://facebook.github.io/flux/) as popularised by Facebook.
 
 This library is direct port of Fluxxor and works a lot like it. It is currently highly experimental but I wish to develop it into a full fledged library. It is untested and I advise against using it in production.
 
@@ -20,7 +20,7 @@ Until that is done, I won't be releasing it on Maven/JCenter.
 
 ####0.0.2
   - Notify store listeners on the UI thread
-  - Added getFlux method to `Store`
+  - Added `getFlux` method to `Store`
   - Synchronized `Dispatcher.dispatch` method
 
 ####0.0.1
@@ -96,15 +96,15 @@ There should be only one instance of this in your App and the best place to inst
 
     public class MyApp extends Application {
     
-        static Flux<MyActions> FluxDroid;
+        static Flux<MyActions> DroidFlux;
     
         @Override
         public void onCreate() {
-            FluxDroid = new Flux<MyActions>(new Store[]{new MyStore()}, new MyActions());
+            DroidFlux = new Flux<MyActions>(new Store[]{new MyStore()}, new MyActions());
         }
     
         public static Flux<MyActions> getFlux() {
-            return FluxDroid;
+            return DroidFlux;
         }
     }
 

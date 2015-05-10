@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DispatcherImpl implements Dispatcher {
 
-    private static final String TAG = "FluxDroid:Dispatcher";
+    private static final String TAG = "DroidFlux:Dispatcher";
 
     protected final ConcurrentHashMap<String, Store> mStores = new ConcurrentHashMap<String, Store>();
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);

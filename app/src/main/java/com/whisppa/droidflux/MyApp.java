@@ -10,14 +10,14 @@ import com.whisppa.droidfluxlib.Store;
  */
 public class MyApp extends Application {
 
-    static Flux<MyActions> FluxDroid;
+    static Flux<MyActions> DroidFlux;
 
     @Override
     public void onCreate() {
-        FluxDroid = new Flux<MyActions>(new Store[]{new MyStore(), new MyOtherStore()}, new MyActions());
+        DroidFlux = new Flux<MyActions>(new Store[]{new MyStore(), new MyOtherStore()}, new MyActions());
     }
 
     public static Flux<MyActions> getFlux() {
-        return FluxDroid;
+        return DroidFlux;
     }
 }
