@@ -1,7 +1,8 @@
 package com.whisppa.droidfluxlib.impl;
 
-import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,10 +31,15 @@ public class DispatcherImpl implements Dispatcher {
     private static final String TAG = "DroidFlux:Dispatcher";
 
     protected final ConcurrentHashMap<String, Store> mStores = new ConcurrentHashMap<String, Store>();
+    private final DispatchThread mDispatchThread;
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
     protected java.util.Collection mWaitingToDispatch;
 
+    public DispatcherImpl() {
+        mDispatchThread = new DispatchThread();
+        mDispatchThread.start();
+    }
 
     @Override
     public void addStore(@NonNull String name, @NonNull Store store) {
@@ -71,46 +77,19 @@ public class DispatcherImpl implements Dispatcher {
                 }
             };
         }
-        final DispatchExceptionListener _dispatchExceptionListener = dispatchExceptionListener;
-
-
-        //TODO: Still wondering if this should be run on a separate thread.
-        //Will be able to tell after more testing is done and we notice performance is being impacted
-
-
+        
         mIsDispatching.set(true);
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        doDispatchLoop(payload);
-                    }
-                    catch (Exception e) {
-                        _dispatchExceptionListener.onException(e);
-                    }
-                    finally {
-                        mCurrentActionType = null;
-                        mIsDispatching.set(false);
-                    }
-                }
-            }).start();
-        } else {
-            // we are not on the UI thread, so no need wasting another thread
-            try {
-                doDispatchLoop(payload);
-            }
-            catch (Exception e) {
-                dispatchExceptionListener.onException(e);
-            }
-            finally {
-                mCurrentActionType = null;
-                mIsDispatching.set(false);
-            }
-        }
+
+        Message msg = Message.obtain();
+        msg.obj =  new DispatchArgs(payload, dispatchExceptionListener);
+        mDispatchThread.Handler.sendMessage(msg);
     }
 
     private void doDispatchLoop(Payload payload) throws Exception {
+
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            throw new Exception("Loop should not be run from the UI Thread");
+        }
 
         Store dispatch;
         Boolean canBeDispatchedTo = false;
@@ -202,5 +181,43 @@ public class DispatcherImpl implements Dispatcher {
     @Override
     public boolean isDispatching() {
         return mIsDispatching.get();
+    }
+
+    class DispatchThread extends Thread {
+        public Handler Handler;
+
+        @Override
+        public void run(){
+            Looper.prepare();
+
+            Handler = new Handler() {
+                public void handleMessage(Message msg) {
+                    DispatchArgs args = (DispatchArgs) msg.obj;
+
+                    try {
+                        doDispatchLoop(args.Payload);
+                    }
+                    catch (Exception e) {
+                        args.Listener.onException(e);
+                    }
+                    finally {
+                        mCurrentActionType = null;
+                        mIsDispatching.set(false);
+                    }
+                }
+            };
+
+            Looper.loop();
+        }
+    }
+
+    class DispatchArgs {
+        Payload Payload;
+        DispatchExceptionListener Listener;
+
+        public DispatchArgs(Payload payload, DispatchExceptionListener dispatchExceptionListener) {
+            Payload = payload;
+            Listener = dispatchExceptionListener;
+        }
     }
 }
