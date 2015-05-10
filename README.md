@@ -19,10 +19,12 @@ Until that is done, I won't be releasing it on Maven/JCenter.
 ### ChangeLog
 
 ####0.0.2
-Notify store listeners on the UI thread
+  - Notify store listeners on the UI thread
+  - Added getFlux method to `Store`
+  - Synchronized `Dispatcher.dispatch` method
 
 ####0.0.1
-Initial Code Commit
+  - Initial Code Commit
 
 
 ### Installation
