@@ -37,7 +37,7 @@ public class DispatcherImpl implements Dispatcher {
         mStores.put(name, store);
     }
 
-    public void dispatch(@NonNull Payload payload) throws Exception {
+    public synchronized void dispatch(@NonNull Payload payload) throws Exception {
         if (payload == null || TextUtils.isEmpty(payload.Type)) {
             throw new Exception("Can only dispatch actions with a 'type' property");
         }
@@ -85,10 +85,6 @@ public class DispatcherImpl implements Dispatcher {
 
             if (canBeDispatchedTo) {
                 if (dispatch.getWaitCallback() != null) {
-//                    var stores = _map(dispatch.waitingOn, function(key) {
-//                        return this.stores[key];
-//                    }, this);
-
                     Callback fn = dispatch.getWaitCallback();
                     dispatch.resetState();
                     dispatch.setResolved(true);
