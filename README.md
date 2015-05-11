@@ -1,5 +1,7 @@
 # DroidFlux
 
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-DroidFlux-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786)
+
 DroidFlux is an Android port of the popular [Fluxxor](http://fluxxor.com) library that seeks to implement the [Flux Architecture](https://facebook.github.io/flux/) as popularised by Facebook.
 
 This library is direct port of Fluxxor and works a lot like it. It is currently highly experimental but I wish to develop it into a full fledged library. It is untested and I advise against using it in production.

@@ -77,7 +77,7 @@ public class DispatcherImpl implements Dispatcher {
                 }
             };
         }
-        
+
         mIsDispatching.set(true);
 
         Message msg = Message.obtain();
