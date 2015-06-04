@@ -14,6 +14,7 @@ import com.whisppa.droidfluxlib.Payload;
 import com.whisppa.droidfluxlib.Store;
 import com.whisppa.droidfluxlib.utils.CollectionUtil;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,17 +47,17 @@ public class DispatcherImpl implements Dispatcher {
         mStores.put(name, store);
     }
 
-    public synchronized void dispatch(@NonNull Payload payload) throws Exception {
+    public synchronized void dispatch(@NonNull Payload payload) {
         dispatch(payload, null);
     }
 
-    public synchronized void dispatch(@NonNull final Payload payload, DispatchExceptionListener dispatchExceptionListener) throws Exception {
+    public synchronized void dispatch(@NonNull final Payload payload, DispatchExceptionListener dispatchExceptionListener) {
         if (payload == null || TextUtils.isEmpty(payload.Type)) {
-            throw new Exception("Can only dispatch actions with a 'type' property");
+            throw new IllegalArgumentException("Can only dispatch actions with a valid 'type' property");
         }
 
         if (isDispatching()) {
-            throw new Exception("Cannot dispatch an action ('" + payload.Type + "') while another action ('" + mCurrentActionType + "') is being dispatched");
+            throw new RuntimeException("Cannot dispatch an action ('" + payload.Type + "') while another action ('" + mCurrentActionType + "') is being dispatched");
         }
 
         String[] names = mStores.keySet().toArray(new String[0]);
