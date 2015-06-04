@@ -8,10 +8,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.whisppa.droidfluxlib.Flux;
 import com.whisppa.droidfluxlib.StoreListener;
+import com.whisppa.droidfluxlib.ui.StoreActivity;
 
 
-public class MainActivity extends ActionBarActivity implements StoreListener {
+public class MainActivity extends StoreActivity {
 
     private Button btn;
     private TextView txt;
@@ -70,17 +72,7 @@ public class MainActivity extends ActionBarActivity implements StoreListener {
     protected void onResume() {
         super.onResume();
 
-        MyStore store = (MyStore) MyApp.getFlux().getStore(MyStore.class.getName());
-        store.addListener(this);
-        txt.setText(store.getState());
-
-        MyOtherStore otherStore = (MyOtherStore) MyApp.getFlux().getStore(MyOtherStore.class.getName());
-        otherStore.addListener(this);
-        MyOtherStore.MyState state = otherStore.getState();
-        if(state.isLoading)
-            txt2.setText("Currently Loading User");
-        else if(state.hasLoaded)
-            txt2.setText(state.user);
+        onChanged();
     }
 
 
@@ -92,6 +84,16 @@ public class MainActivity extends ActionBarActivity implements StoreListener {
 
         MyOtherStore otherStore = (MyOtherStore) MyApp.getFlux().getStore(MyOtherStore.class.getName());
         otherStore.removeListener(this);
+    }
+
+    @Override
+    protected String[] getStores() {
+        return new String[]{MyStore.class.getName(), MyOtherStore.class.getName()};
+    }
+
+    @Override
+    protected Flux getFlux() {
+        return MyApp.getFlux();
     }
 
     @Override
