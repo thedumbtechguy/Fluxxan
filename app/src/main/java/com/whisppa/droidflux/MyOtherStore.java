@@ -2,6 +2,7 @@ package com.whisppa.droidflux;
 
 import com.whisppa.droidfluxlib.Flux;
 import com.whisppa.droidfluxlib.Payload;
+import com.whisppa.droidfluxlib.annotation.BindAction;
 import com.whisppa.droidfluxlib.impl.AbstractStoreImpl;
 
 import java.util.Random;
@@ -12,16 +13,7 @@ import java.util.Random;
 public class MyOtherStore extends AbstractStoreImpl<MyOtherStore.MyState> {
     MyState myState = new MyState();
 
-    public MyOtherStore() {
-        try {
-            bindAction(MyActions.GET_USER, "getUser");
-            bindAction(MyActions.GET_USER_ASYNC_LOADING, "getUserAsyncLoading");
-            bindAction(MyActions.GET_USER_ASYNC_LOADED, "getUserAsyncLoaded");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    @BindAction(MyActions.GET_USER)
     public void getUser(Payload payload) {
         myState.user = "User: " + new Random().nextInt();
         myState.isLoading = false;
@@ -30,6 +22,7 @@ public class MyOtherStore extends AbstractStoreImpl<MyOtherStore.MyState> {
         this.notifyListeners();
     }
 
+    @BindAction(MyActions.GET_USER_ASYNC_LOADED)
     public void getUserAsyncLoaded(Payload payload) {
         myState.user = "User Async: " + payload.Data.getInt("ID");
         myState.isLoading = false;
@@ -38,6 +31,7 @@ public class MyOtherStore extends AbstractStoreImpl<MyOtherStore.MyState> {
         this.notifyListeners();
     }
 
+    @BindAction(MyActions.GET_USER_ASYNC_LOADING)
     public void getUserAsyncLoading(Payload payload) {
         myState.user = "";
         myState.hasLoaded = false;

@@ -2,6 +2,7 @@ package com.whisppa.droidfluxlib.impl;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.whisppa.droidfluxlib.Callback;
@@ -9,8 +10,12 @@ import com.whisppa.droidfluxlib.Dispatcher;
 import com.whisppa.droidfluxlib.Payload;
 import com.whisppa.droidfluxlib.Store;
 import com.whisppa.droidfluxlib.StoreListener;
+import com.whisppa.droidfluxlib.annotation.BindAction;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.security.InvalidParameterException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,9 +40,36 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     private final List<StoreListener> mListeners;
     private final List<String> mWaitingOnList;
 
+    //ensure you call super else!!!
     public AbstractStoreImpl() {
         mListeners = Collections.synchronizedList(new ArrayList<StoreListener>());
         mWaitingOnList = Collections.synchronizedList(new ArrayList<String>());
+
+        Method[] methods = this.getClass().getMethods();
+        for (Method m : methods) {
+            if (m.isAnnotationPresent(BindAction.class)) {
+
+                String methodName = m.getName();
+
+                Annotation annotation = m.getAnnotation(BindAction.class);
+                BindAction actionAnnotation = (BindAction) annotation;
+                String actionName = actionAnnotation.value();
+
+                if(TextUtils.isEmpty(actionName))
+                    throw new IllegalArgumentException("BindAction value cannot be empty");
+
+                Class<?>[] x = m.getParameterTypes();
+
+                if(x.length != 1)
+                    throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
+
+                if(!x[0].getName().equals(Payload.class.getName()))
+                    throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
+
+
+                bindAction(actionName, methodName);
+            }
+        }
     }
 
     @Override
@@ -117,19 +149,7 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
         mWaitingOnList.addAll(storeNames);
     }
 
-
-    public void bindActions(HashMap<String, String> actionMap) throws Exception {
-        Iterator<Map.Entry<String, String>> it = actionMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, String> entry = it.next();
-            bindAction(entry.getKey(), entry.getValue());
-        }
-    }
-
-    public void bindAction(String actionType, String methodName) throws Exception {
-        //TODO: make a check if the method actually exists and is accessible. Wondering it that is a good idea here
-        //It should prevent issues when calling the method later on
-        // throw new Exception("Invalid method name '" + method + "' passed in actions map");
+    private void bindAction(String actionType, String methodName) {
         mActionMap.put(actionType, methodName);
     }
 
