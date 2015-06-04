@@ -45,7 +45,7 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
         mListeners = Collections.synchronizedList(new ArrayList<StoreListener>());
         mWaitingOnList = Collections.synchronizedList(new ArrayList<String>());
 
-        Method[] methods = this.getClass().getMethods();
+        Method[] methods = this.getClass().getMethods();//get only public methods
         for (Method m : methods) {
             if (m.isAnnotationPresent(BindAction.class)) {
 
@@ -58,12 +58,12 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
                 if(TextUtils.isEmpty(actionName))
                     throw new IllegalArgumentException("BindAction value cannot be empty");
 
-                Class<?>[] x = m.getParameterTypes();
+                Class<?>[] parameterTypes = m.getParameterTypes();
 
-                if(x.length != 1)
+                if(parameterTypes.length != 1)
                     throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
 
-                if(!x[0].getName().equals(Payload.class.getName()))
+                if(!parameterTypes[0].getName().equals(Payload.class.getName()))
                     throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
 
 
