@@ -22,6 +22,7 @@ public interface Store<State> {
     public void addToWaitingOnList(Collection<String> storeNames);
 
     public Callback getWaitCallback();
+    public void setWaitCallback(Callback callback);
     public void waitFor(String[] storeNames, Callback callback)  throws Exception;
 
     public State getState();

@@ -78,6 +78,11 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     }
 
     @Override
+    public void setWaitCallback(Callback callback) {
+        mWaitCallback = callback;
+    }
+
+    @Override
     public void notifyListeners() {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override

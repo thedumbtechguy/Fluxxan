@@ -175,6 +175,8 @@ public class DispatcherImpl implements Dispatcher {
         }
 
         dispatch.resetState();
+
+        dispatch.setWaitCallback(callback);
         dispatch.addToWaitingOnList(storeNames);
     }
 
