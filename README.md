@@ -58,7 +58,7 @@ A Payload holds both the action type (A Constant string which Stores can bind to
 
 ### Store
 
-A given Store holds some required data. It reacts to dispatched payloads to perform actions. A store returns it's State (any custom object) via `getState`. It binds to actions via `bindAction(String actionType, String methodName)`. The given method must exist, be accessible (public) and take a single `Payload` parameter. Stores must implement `com.whisppa.droidfluxlib.Store` or extend the abstract implementation `com.whisppa.droidfluxlib.impl.AbstractStoreImpl`.
+A given Store holds some required data. It reacts to dispatched payloads to perform actions. A store returns it's State (any custom object) via `getState`. It binds to actions via the annotation `@BindAction("ActionName")`. The given method be accessible (public) and take a single `Payload` parameter. Stores must implement `com.whisppa.droidfluxlib.Store` or extend the abstract implementation `com.whisppa.droidfluxlib.impl.AbstractStoreImpl`.
 
 A store can take listeners of type `StoreListener` which it notifies of changes to its state using `notifyListeners()`.
 
@@ -69,14 +69,7 @@ Stores cannot be asynchronous by nature and must return immediately. Any Asynchr
     public class MyStore extends AbstractStoreImpl<String> {
         String user = "User: Default";
     
-        public MyStore() {
-            try {
-                bindAction(MyActions.GET_USER, "getUser");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    
+		@BindAction(MyActions.GET_USER)
         public void getUser(Payload payload) {
             user = "User: " + new Random().nextInt();
             this.notifyListeners();
