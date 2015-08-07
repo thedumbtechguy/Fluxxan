@@ -17,7 +17,7 @@ public class MyActions extends AbstractActionsImpl {
 
     public void getUser() {
         try {
-            mDispatcher.dispatch(new Payload(GET_USER, new Bundle()));
+            mDispatcher.dispatch(new Payload<Object>(GET_USER));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -26,7 +26,7 @@ public class MyActions extends AbstractActionsImpl {
     public void getUserAsync() {
         try {
             //notify the ui that we are loading
-            mDispatcher.dispatch(new Payload(GET_USER_ASYNC_LOADING, new Bundle()));
+            mDispatcher.dispatch(new Payload<Object>(GET_USER_ASYNC_LOADING));
 
             //fetch the actual data
             new Thread(new Runnable(){
@@ -34,9 +34,10 @@ public class MyActions extends AbstractActionsImpl {
                 public void run(){
                     try {
                         Thread.sleep(2000);
-                        Bundle bundle = new Bundle();
-                        bundle.putInt("ID", new Random().nextInt());
-                        mDispatcher.dispatch(new Payload(GET_USER_ASYNC_LOADED, bundle));
+
+                        User bundle = new User();
+                        bundle.ID = new Random().nextInt();
+                        mDispatcher.dispatch(new Payload<User>(GET_USER_ASYNC_LOADED, bundle));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -47,6 +48,11 @@ public class MyActions extends AbstractActionsImpl {
         }
 
 
+    }
+
+    public class User
+    {
+        public int ID;
     }
 
 }

@@ -14,19 +14,19 @@ public class MyStore extends AbstractStoreImpl<String> {
     String user = "User: Default";
 
     @BindAction(MyActions.GET_USER)
-    public void getUser(Payload payload) {
+    public void getUser(Object pl) {
         user = "User: " + new Random().nextInt();
         this.notifyListeners();
     }
 
     @BindAction(MyActions.GET_USER_ASYNC_LOADED)
-    public void getUserAsyncLoaded(Payload payload) {
-        user = "User Async: " + payload.Data.getInt("ID");
+    public void getUserAsyncLoaded(MyActions.User payload) {
+        user = "User Async: " + payload.ID;
         this.notifyListeners();
     }
 
     @BindAction(MyActions.GET_USER_ASYNC_LOADING)
-    public void getUserAsyncLoading(Payload payload) {
+    public void getUserAsyncLoading(Object pl) {
         user = "Loading...";
         this.notifyListeners();
     }

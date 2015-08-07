@@ -79,16 +79,16 @@ public class MainActivity extends StoreActivity {
     protected void onStop() {
         super.onStop();
 
-        MyStore store = (MyStore) MyApp.getFlux().getStore(MyStore.class.getName());
+        MyStore store = (MyStore) MyApp.getFlux().getStore(MyStore.class);
         store.removeListener(this);
 
-        MyOtherStore otherStore = (MyOtherStore) MyApp.getFlux().getStore(MyOtherStore.class.getName());
+        MyOtherStore otherStore = (MyOtherStore) MyApp.getFlux().getStore(MyOtherStore.class);
         otherStore.removeListener(this);
     }
 
     @Override
-    protected String[] getStores() {
-        return new String[]{MyStore.class.getName(), MyOtherStore.class.getName()};
+    protected Class[] getStores() {
+        return new Class[]{MyStore.class, MyOtherStore.class};
     }
 
     @Override
@@ -120,10 +120,10 @@ public class MainActivity extends StoreActivity {
 
     @Override
     public void onChanged() {
-        MyStore store = (MyStore) MyApp.getFlux().getStore(MyStore.class.getName());
+        MyStore store = MyApp.getFlux().getStore(MyStore.class);
         txt.setText(store.getState());
 
-        MyOtherStore otherStore = (MyOtherStore) MyApp.getFlux().getStore(MyOtherStore.class.getName());
+        MyOtherStore otherStore = MyApp.getFlux().getStore(MyOtherStore.class);
         MyOtherStore.MyState state = otherStore.getState();
         if(state.isLoading)
             txt2.setText("Currently Loading User");
