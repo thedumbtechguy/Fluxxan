@@ -13,7 +13,7 @@ import com.whisppa.droidfluxlib.utils.StoreHelper;
  */
 abstract public class StoreActivity extends AppCompatActivity implements StoreListener {
 
-    private StoreHelper mStoreHelper;
+    protected StoreHelper mStoreHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +32,7 @@ abstract public class StoreActivity extends AppCompatActivity implements StoreLi
         mStoreHelper.onStop();
     }
 
-    protected abstract String[] getStores();
+    protected abstract Class[] getStores();
     protected abstract Flux getFlux();
 
 }

@@ -56,16 +56,20 @@ public class Flux<Acts extends Actions> {
 
     public void addStore(@NonNull String name, @NonNull Store store) {
         store.setDispatcher(mDispatcher);
-        mStores.put(name, store);
+        getStores().put(name, store);
         mDispatcher.addStore(name, store);
+    }
+
+    public void removeStore(Class store) {
+        getStores().remove(store.getName());
     }
 
     protected ConcurrentHashMap<String, Store> getStores() {
         return mStores;
     }
 
-    public Store getStore(String name) {
-        return getStores().get(name);
+    public <T extends Store> T getStore(Class<T> store) {
+        return (T) getStores().get(store.getName());
     }
 
     public Acts getActions() {

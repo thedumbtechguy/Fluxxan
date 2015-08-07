@@ -9,10 +9,10 @@ import com.whisppa.droidfluxlib.StoreListener;
 public class StoreHelper {
 
     private final Flux mFlux;
-    private final String[] mStores;
+    private final Class[] mStores;
     private final StoreListener mListener;
 
-    public StoreHelper(StoreListener listener, Flux flux, String[] stores) {
+    public StoreHelper(StoreListener listener, Flux flux, Class[] stores) {
         mFlux = flux;
         mStores = stores;
         mListener = listener;
@@ -22,6 +22,8 @@ public class StoreHelper {
         for(int i = 0; i < mStores.length; i++) {
             mFlux.getStore(mStores[i]).addListener(mListener);
         }
+
+        mListener.onChanged();//automatically call onChanged to trigger updates
     }
 
 
