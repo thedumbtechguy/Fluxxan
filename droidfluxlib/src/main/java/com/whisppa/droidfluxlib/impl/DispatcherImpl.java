@@ -14,7 +14,7 @@ import com.whisppa.droidfluxlib.Payload;
 import com.whisppa.droidfluxlib.Store;
 import com.whisppa.droidfluxlib.utils.CollectionUtil;
 
-import java.security.InvalidParameterException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,14 +32,14 @@ public class DispatcherImpl implements Dispatcher {
     private static final String TAG = "DroidFlux:Dispatcher";
 
     protected final ConcurrentHashMap<String, Store> mStores = new ConcurrentHashMap<String, Store>();
-    private final DispatchThread mDispatchThread;
+//    private final DispatchThread mDispatchThread;
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
     protected java.util.Collection mWaitingToDispatch;
 
     public DispatcherImpl() {
-        mDispatchThread = new DispatchThread();
-        mDispatchThread.start();
+//        mDispatchThread = new DispatchThread();
+//        mDispatchThread.start();
     }
 
     @Override
@@ -53,7 +53,7 @@ public class DispatcherImpl implements Dispatcher {
 
     public synchronized void dispatch(@NonNull final Payload payload, DispatchExceptionListener dispatchExceptionListener) {
         if (payload == null || TextUtils.isEmpty(payload.Type)) {
-            throw new IllegalArgumentException("Can only dispatch actions with a valid 'type' property");
+            throw new IllegalArgumentException("Can only dispatch actions with a valid 'Type' property");
         }
 
         if (isDispatching()) {
@@ -63,7 +63,7 @@ public class DispatcherImpl implements Dispatcher {
         String[] names = mStores.keySet().toArray(new String[0]);
         for(int i=0; i < names.length; i++) {
             Store store = mStores.get(names[i]);
-            store.resetState();
+            store.reset();
         }
 
         mCurrentActionType = payload.Type;
@@ -81,16 +81,30 @@ public class DispatcherImpl implements Dispatcher {
 
         mIsDispatching.set(true);
 
-        Message msg = Message.obtain();
-        msg.obj =  new DispatchArgs(payload, dispatchExceptionListener);
-        mDispatchThread.Handler.sendMessage(msg);
+//        Message msg = Message.obtain();
+//        msg.obj =  new DispatchArgs(payload, dispatchExceptionListener);
+//        mDispatchThread.Handler.sendMessage(msg);
+
+        try {
+            Log.i("DroidFlux:Dispatcher", String.format("[STARTED] dispatch of action [%s]", payload.Type));
+            doDispatchLoop(payload);
+            Log.i("DroidFlux:Dispatcher", String.format("[COMPLETED] dispatch of action [%s]", payload.Type));
+        }
+        catch (Exception e) {
+            Log.e("DroidFlux:Dispatcher", String.format("[FAILED] dispatch of action [%s]", payload.Type), e);
+            dispatchExceptionListener.onException(e);
+        }
+        finally {
+            mCurrentActionType = null;
+            mIsDispatching.set(false);
+        }
     }
 
-    private void doDispatchLoop(Payload payload) throws Exception {
+    private synchronized void doDispatchLoop(Payload payload) throws Exception {
 
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            throw new Exception("Loop should not be run from the UI Thread");
-        }
+//        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+//            throw new Exception("Loop should not be run from the UI Thread");
+//        }
 
         Store dispatch;
         Boolean canBeDispatchedTo = false;
@@ -108,7 +122,7 @@ public class DispatcherImpl implements Dispatcher {
             if (canBeDispatchedTo) {
                 if (dispatch.getWaitCallback() != null) {
                     Callback fn = dispatch.getWaitCallback();
-                    dispatch.resetState();
+                    dispatch.reset();
                     dispatch.setResolved(true);
                     fn.call();
                     wasHandled = true;
@@ -175,7 +189,7 @@ public class DispatcherImpl implements Dispatcher {
             }
         }
 
-        dispatch.resetState();
+        dispatch.reset();
 
         dispatch.setWaitCallback(callback);
         dispatch.addToWaitingOnList(storeNames);
@@ -186,41 +200,49 @@ public class DispatcherImpl implements Dispatcher {
         return mIsDispatching.get();
     }
 
-    class DispatchThread extends Thread {
-        public Handler Handler;
+//    class DispatchThread extends Thread {
+//
+//        public Handler Handler;
+//        @Override
+//        public void run(){
+//            Looper.prepare();
+//
+//            Handler = new DispatchHandler(new WeakReference<DispatcherImpl>(DispatcherImpl.this));
+//
+//            Looper.loop();
+//        }
+//    }
+    
+//    static class DispatchHandler extends Handler {
+//        private final WeakReference<DispatcherImpl> mDispatcher;
+//
+//        public DispatchHandler(WeakReference<DispatcherImpl> dispatcher) {
+//            mDispatcher = dispatcher;
+//        }
+//
+//        public void handleMessage(Message msg) {
+//            DispatchArgs args = (DispatchArgs) msg.obj;
+//
+//            try {
+//                mDispatcher.get().doDispatchLoop(args.Payload);
+//            }
+//            catch (Exception e) {
+//                args.Listener.onException(e);
+//            }
+//            finally {
+//                mDispatcher.get().mCurrentActionType = null;
+//                mDispatcher.get().mIsDispatching.set(false);
+//            }
+//        }
+//    }
 
-        @Override
-        public void run(){
-            Looper.prepare();
-
-            Handler = new Handler() {
-                public void handleMessage(Message msg) {
-                    DispatchArgs args = (DispatchArgs) msg.obj;
-
-                    try {
-                        doDispatchLoop(args.Payload);
-                    }
-                    catch (Exception e) {
-                        args.Listener.onException(e);
-                    }
-                    finally {
-                        mCurrentActionType = null;
-                        mIsDispatching.set(false);
-                    }
-                }
-            };
-
-            Looper.loop();
-        }
-    }
-
-    class DispatchArgs {
-        Payload Payload;
-        DispatchExceptionListener Listener;
-
-        public DispatchArgs(Payload payload, DispatchExceptionListener dispatchExceptionListener) {
-            Payload = payload;
-            Listener = dispatchExceptionListener;
-        }
-    }
+//    class DispatchArgs {
+//        Payload Payload;
+//        DispatchExceptionListener Listener;
+//
+//        public DispatchArgs(Payload payload, DispatchExceptionListener dispatchExceptionListener) {
+//            Payload = payload;
+//            Listener = dispatchExceptionListener;
+//        }
+//    }
 }
