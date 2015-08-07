@@ -15,16 +15,13 @@ import com.whisppa.droidfluxlib.annotation.BindAction;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,7 +33,7 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     private Dispatcher mDispatcher;
     private boolean mIsResolved = false;
     private Callback mWaitCallback = null;
-    private final ConcurrentHashMap<String, String> mActionMap = new ConcurrentHashMap<String, String>();
+    private final ConcurrentHashMap<String, Method> mActionMap = new ConcurrentHashMap<>();
     private final List<StoreListener> mListeners;
     private final List<String> mWaitingOnList;
 
@@ -61,13 +58,13 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
                 Class<?>[] parameterTypes = m.getParameterTypes();
 
                 if(parameterTypes.length != 1)
-                    throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
+                    throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument", methodName));//let's just use this exception type for want of a better option
 
-                if(!parameterTypes[0].getName().equals(Payload.class.getName()))
-                    throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
+                //if(!parameterTypes[0].getName().equals(Payload.class.getName()))
+                 //   throw new InvalidParameterException(String.format("Bound method '%s' must accept a single argument of type 'Payload'", methodName));//let's just use this exception type for want of a better option
 
 
-                bindAction(actionName, methodName);
+                bindAction(actionName, m);
             }
         }
     }
@@ -81,10 +78,10 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     public boolean handleAction(Payload payload) throws Exception {
         if(mActionMap.containsKey(payload.Type)) {
             Method method;
-            method = this.getClass().getMethod(mActionMap.get(payload.Type), Payload.class);
+            method = mActionMap.get(payload.Type);//this.getClass().getMethod(mActionMap.get(payload.Type));
 
             //TODO: this should be forced to run on the UI thread
-            method.invoke(this, payload);
+            method.invoke(this, payload.Data);
 
             return true;
         }
@@ -93,7 +90,7 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     }
 
     @Override
-    public void resetState() {
+    public void reset() {
         mIsResolved = false;
         mWaitingOnList.clear();
         mWaitCallback = null;
@@ -149,8 +146,8 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
         mWaitingOnList.addAll(storeNames);
     }
 
-    private void bindAction(String actionType, String methodName) {
-        mActionMap.put(actionType, methodName);
+    private void bindAction(String actionType, Method method) {
+        mActionMap.put(actionType, method);
     }
 
     @Override
