@@ -7,13 +7,20 @@ import android.os.Looper;
  * Created by user on 2/12/2016.
  */
 public class ThreadUtils {
+    public static boolean isOnMain() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
     public static void ensureNotOnMain(){
-        if(Looper.myLooper() == Looper.getMainLooper())
+        if(isOnMain())
             throw new DispatchOnMainThreadException();
     }
 
     public static void runOnMain(Runnable runnable) {
-        new Handler(Looper.getMainLooper()).post(runnable);
+        if(isOnMain())
+            runnable.run();
+        else
+            new Handler(Looper.getMainLooper()).post(runnable);
     }
 
     public static class DispatchOnMainThreadException extends RuntimeException {}
