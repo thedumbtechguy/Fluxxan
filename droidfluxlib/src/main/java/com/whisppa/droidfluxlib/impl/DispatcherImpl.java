@@ -41,6 +41,8 @@ public class DispatcherImpl implements Dispatcher {
 
     @Override
     public void start() {
+        if(isStarted) return;
+        
         mDispatchThread = new Thread(new DispatchThread());
         mDispatchThread.start();
         isStarted = true;

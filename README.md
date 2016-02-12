@@ -23,9 +23,10 @@ Until that is done, I won't be releasing it on Maven/JCenter.
 ####0.0.3
   - Added queue and background thread to handle dispatches off the main thread to increase UI performance.
   - Store listener notification is no longer done on the main thread. UI changes need to be explicitly executed on the main thread.
-  - Added `ThreadUtils` helper to help run UI updates on the main thread from `onChanged` method
-  - Added `StoreListenerFragment` and `StoreListenerView` ase classes
+  - Added `ThreadUtils.runOnMain` helper to help run UI updates on the main thread from `onChanged` method
+  - Added `StoreListenerFragment` and `StoreListenerView` base classes
   - Renamed `StoreActivity` to `StoreListenerActivity`
+  - Added `Dispatcher.start` and `Dispatcher.stop` methods
 
 ####0.0.2
   - Notify store listeners on the UI thread
@@ -102,7 +103,16 @@ There should be only one instance of this in your App and the best place to inst
     
         @Override
         public void onCreate() {
-            DroidFlux = new Flux<MyActions>(new Store[]{new MyStore()}, new MyActions());
+            super.onCreate();
+
+            DroidFlux = new Flux<MyActions>(new Store[]{new MyStore(), new MyOtherStore()}, new MyActions());
+            DroidFlux.getDispatcher().start();
+        }
+
+        public void onTerminate() {
+            super.onTerminate();
+
+            DroidFlux.getDispatcher().stop();
         }
     
         public static Flux<MyActions> getFlux() {
