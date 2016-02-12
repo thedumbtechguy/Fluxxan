@@ -16,7 +16,8 @@ public interface Store<State> {
     public boolean isResolved();
     public boolean setResolved(boolean resolved);
 
-    public void waitFor(String[] storeNames, Callback callback)  throws Exception;
+    public void waitFor(Class[] stores, Callback callback)  throws Exception;
+    public void waitFor(Class store, Callback callback)  throws Exception;
     public Callback getWaitCallback();
     public void setWaitCallback(Callback callback);
     public List<String> getWaitingOnList();
@@ -25,6 +26,7 @@ public interface Store<State> {
     public boolean addListener(StoreListener storeListener);
     public void removeListener(StoreListener storeListener);
     public void notifyListeners();
+    public void notifyListeners(Callback callback);
 
     public Flux getFlux();
     public State getState();

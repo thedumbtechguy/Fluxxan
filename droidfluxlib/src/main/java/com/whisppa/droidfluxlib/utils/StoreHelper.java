@@ -18,7 +18,7 @@ public class StoreHelper {
         mListener = listener;
     }
 
-    public void onResume() {
+    public void onStart() {
         for(int i = 0; i < mStores.length; i++) {
             mFlux.getStore(mStores[i]).addListener(mListener);
         }

@@ -1,90 +1,78 @@
 package com.whisppa.droidfluxlib.impl;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.whisppa.droidfluxlib.Callback;
-import com.whisppa.droidfluxlib.DispatchExceptionListener;
 import com.whisppa.droidfluxlib.Dispatcher;
 import com.whisppa.droidfluxlib.Payload;
 import com.whisppa.droidfluxlib.Store;
-import com.whisppa.droidfluxlib.utils.CollectionUtil;
+import com.whisppa.droidfluxlib.utils.CollectionUtils;
+import com.whisppa.droidfluxlib.utils.ThreadUtils;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by user on 5/5/2015.
- * I might be overly compensating for concurrency, but thread safety is not my forte
  */
 public class DispatcherImpl implements Dispatcher {
 
     private static final String TAG = "DroidFlux:Dispatcher";
 
-    protected final ConcurrentHashMap<String, Store> mStores = new ConcurrentHashMap<String, Store>();
-//    private final DispatchThread mDispatchThread;
+    protected final ConcurrentLinkedQueue<Payload> mDispatchQueue = new ConcurrentLinkedQueue<>();;
+    protected final ConcurrentHashMap<String, Store> mStores = new ConcurrentHashMap<>();
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
-    protected java.util.Collection mWaitingToDispatch;
+    protected Collection<String> mWaitingToDispatch;
+
+    protected boolean isStarted;
+    private Thread mDispatchThread;
 
     public DispatcherImpl() {
-//        mDispatchThread = new DispatchThread();
-//        mDispatchThread.start();
     }
 
     @Override
-    public void addStore(@NonNull String name, @NonNull Store store) {
-        mStores.put(name, store);
+    public void start() {
+        mDispatchThread = new Thread(new DispatchThread());
+        mDispatchThread.start();
+        isStarted = true;
     }
 
-    public synchronized void dispatch(@NonNull Payload payload) {
-        dispatch(payload, null);
+    @Override
+    public void stop() {
+        isStarted = false;
+        mDispatchThread.interrupt();
+        try {
+            mDispatchThread.join(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mDispatchThread = null;
     }
 
-    public synchronized void dispatch(@NonNull final Payload payload, DispatchExceptionListener dispatchExceptionListener) {
-        if (payload == null || TextUtils.isEmpty(payload.Type)) {
-            throw new IllegalArgumentException("Can only dispatch actions with a valid 'Type' property");
-        }
+    protected void _dispatch(@NonNull final Payload payload) {
+        ThreadUtils.ensureNotOnMain();
 
-        if (isDispatching()) {
-            throw new RuntimeException("Cannot dispatch an action ('" + payload.Type + "') while another action ('" + mCurrentActionType + "') is being dispatched");
-        }
-
-        String[] names = mStores.keySet().toArray(new String[0]);
-        for(int i=0; i < names.length; i++) {
-            Store store = mStores.get(names[i]);
+        String[] names = mStores.keySet().toArray(new String[mStores.size()]);
+        for (String name : names) {
+            Store store = mStores.get(name);
             store.reset();
         }
 
         mCurrentActionType = payload.Type;
-        mWaitingToDispatch = new HashSet(mStores.keySet());
-
-        //set a default exception listener
-        if(dispatchExceptionListener == null) {
-            dispatchExceptionListener = new DispatchExceptionListener() {
-                @Override
-                public void onException(Exception e) {
-                    Log.e(TAG, "A dispatch exception occurred", e);
-                }
-            };
-        }
+        mWaitingToDispatch = new HashSet<>(mStores.keySet());
 
         mIsDispatching.set(true);
 
-//        Message msg = Message.obtain();
-//        msg.obj =  new DispatchArgs(payload, dispatchExceptionListener);
-//        mDispatchThread.Handler.sendMessage(msg);
-
+        RuntimeException ex = null;
         try {
             Log.i("DroidFlux:Dispatcher", String.format("[STARTED] dispatch of action [%s]", payload.Type));
             doDispatchLoop(payload);
@@ -92,32 +80,29 @@ public class DispatcherImpl implements Dispatcher {
         }
         catch (Exception e) {
             Log.e("DroidFlux:Dispatcher", String.format("[FAILED] dispatch of action [%s]", payload.Type), e);
-            dispatchExceptionListener.onException(e);
+            ex = new RuntimeException(e);
         }
         finally {
             mCurrentActionType = null;
             mIsDispatching.set(false);
         }
+
+        //we need to propagate the exception
+        if(ex != null) throw ex;
     }
 
-    private synchronized void doDispatchLoop(Payload payload) throws Exception {
-
-//        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-//            throw new Exception("Loop should not be run from the UI Thread");
-//        }
+    protected synchronized void doDispatchLoop(Payload payload) throws Exception {
+        ThreadUtils.ensureNotOnMain();
 
         Store dispatch;
-        Boolean canBeDispatchedTo = false;
+        Boolean canBeDispatchedTo;
         Boolean wasHandled = false;
         List<String> removeFromDispatchQueue = new ArrayList<>();
         List<String> dispatchedThisLoop = new ArrayList<>();
 
-        Iterator<String> it = mWaitingToDispatch.iterator();
-        while(it.hasNext()) {
-            String key = it.next();
-
+        for (String key : mWaitingToDispatch) {
             dispatch = mStores.get(key);
-            canBeDispatchedTo = (dispatch.getWaitingOnList().size() == 0) || (CollectionUtil.intersection(dispatch.getWaitingOnList(), new ArrayList<String>(mWaitingToDispatch)).size() == 0);
+            canBeDispatchedTo = (dispatch.getWaitingOnList().size() == 0) || (CollectionUtils.intersection(dispatch.getWaitingOnList(), new ArrayList<>(mWaitingToDispatch)).size() == 0);
 
             if (canBeDispatchedTo) {
                 if (dispatch.getWaitCallback() != null) {
@@ -126,8 +111,7 @@ public class DispatcherImpl implements Dispatcher {
                     dispatch.setResolved(true);
                     fn.call();
                     wasHandled = true;
-                }
-                else {
+                } else {
                     dispatch.setResolved(true);
                     boolean handled = mStores.get(key).handleAction(payload);
                     if (handled) {
@@ -140,11 +124,10 @@ public class DispatcherImpl implements Dispatcher {
                     removeFromDispatchQueue.add(key);
                 }
             }
-
         }
 
         if (mWaitingToDispatch.size() > 0 && dispatchedThisLoop.size() == 0) {
-            String storesWithCircularWaits = CollectionUtil.implode(mWaitingToDispatch.iterator());
+            String storesWithCircularWaits = CollectionUtils.implode(mWaitingToDispatch.iterator());
             throw new Exception("Indirect circular wait detected among: " + storesWithCircularWaits);
         }
 
@@ -156,16 +139,38 @@ public class DispatcherImpl implements Dispatcher {
         }
 
         if (!wasHandled) {
-            Log.d(TAG, "An action of type " + payload.Type + " was dispatched, but no store handled it");
+            Log.d(TAG, String.format("An action of type [%s] was dispatched, but no store handled it", payload.Type));
         }
     }
 
-    public void waitFor(String waitingStoreName, Set<String> storeNames, Callback callback) throws Exception {
+    //------ public api
+
+    public void addStore(@NonNull String name, @NonNull Store store) {
+        mStores.put(name, store);
+    }
+
+    public void dispatch(@NonNull Payload payload) {
+        if(!isStarted) {
+            throw new IllegalStateException("Dispatcher not started!");
+        }
+
+        if (TextUtils.isEmpty(payload.Type)) {
+            throw new IllegalArgumentException("Can only dispatch actions with a valid 'Type' property");
+        }
+
+        mDispatchQueue.add(payload);
+    }
+
+    public void waitFor(Class waitingStore, Set<Class> storeNames, Callback callback) throws Exception {
+        ThreadUtils.ensureNotOnMain();
+
+        String waitingStoreName = waitingStore.getName();
+
         if (!isDispatching()) {
             throw new Exception("Cannot wait unless an action is being dispatched");
         }
 
-        if (storeNames.contains(waitingStoreName)) {
+        if (storeNames.contains(waitingStore)) {
             throw new Exception("A store cannot wait on itself");
         }
 
@@ -175,9 +180,8 @@ public class DispatcherImpl implements Dispatcher {
             throw new Exception(waitingStoreName + " is already waiting on stores");
         }
 
-        Iterator<String> it = storeNames.iterator();
-        while (it.hasNext()){
-            String storeName = it.next();
+        for (Class storeName1 : storeNames) {
+            String storeName = storeName1.getName();
 
             if (!mStores.containsKey(storeName)) {
                 throw new Exception("Cannot wait for non-existent store " + storeName);
@@ -195,54 +199,31 @@ public class DispatcherImpl implements Dispatcher {
         dispatch.addToWaitingOnList(storeNames);
     }
 
-    @Override
     public boolean isDispatching() {
         return mIsDispatching.get();
     }
 
-//    class DispatchThread extends Thread {
-//
-//        public Handler Handler;
-//        @Override
-//        public void run(){
-//            Looper.prepare();
-//
-//            Handler = new DispatchHandler(new WeakReference<DispatcherImpl>(DispatcherImpl.this));
-//
-//            Looper.loop();
-//        }
-//    }
-    
-//    static class DispatchHandler extends Handler {
-//        private final WeakReference<DispatcherImpl> mDispatcher;
-//
-//        public DispatchHandler(WeakReference<DispatcherImpl> dispatcher) {
-//            mDispatcher = dispatcher;
-//        }
-//
-//        public void handleMessage(Message msg) {
-//            DispatchArgs args = (DispatchArgs) msg.obj;
-//
-//            try {
-//                mDispatcher.get().doDispatchLoop(args.Payload);
-//            }
-//            catch (Exception e) {
-//                args.Listener.onException(e);
-//            }
-//            finally {
-//                mDispatcher.get().mCurrentActionType = null;
-//                mDispatcher.get().mIsDispatching.set(false);
-//            }
-//        }
-//    }
 
-//    class DispatchArgs {
-//        Payload Payload;
-//        DispatchExceptionListener Listener;
-//
-//        public DispatchArgs(Payload payload, DispatchExceptionListener dispatchExceptionListener) {
-//            Payload = payload;
-//            Listener = dispatchExceptionListener;
-//        }
-//    }
+    //------ inner classes
+
+    private final class DispatchThread implements Runnable {
+        @Override
+        public void run() {
+            boolean run = true;
+            while (run) {
+                if(mDispatchThread.isInterrupted()) return;
+
+                Payload payload = mDispatchQueue.poll();
+                if(payload != null) {
+                    _dispatch(payload);
+                }
+                else
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        run = false;
+                    }
+            }
+        }
+    }
 }

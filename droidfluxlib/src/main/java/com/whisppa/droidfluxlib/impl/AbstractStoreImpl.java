@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by user on 5/5/2015.
  */
-public abstract class AbstractStoreImpl<State> implements Store<Object> {
+public abstract class AbstractStoreImpl<State> implements Store<State> {
     private static final String TAG = "DroidFlux:AbstractStore";
     private Dispatcher mDispatcher;
     private boolean mIsResolved = false;
@@ -112,23 +112,30 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     }
 
     @Override
-    public void notifyListeners() {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (mListeners) {
-                    Iterator<StoreListener> it = mListeners.iterator(); // Must be in synchronized block
-                    while (it.hasNext()) {
-                        try {
-                            it.next().onChanged();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Unexpected exception during notifyAll", e);
-                            throw e;//no idea what this will do
-                        }
-                    }
+    public void notifyListeners(final Callback callback) {
+        synchronized (mListeners) {
+            Exception exception = null;
+            Iterator<StoreListener> it = mListeners.iterator(); // Must be in synchronized block
+            while (it.hasNext()) {
+                try {
+                    it.next().onChanged();
+                } catch (Exception e) {
+                    Log.e(TAG, "Unexpected exception during notifyAll", e);
+                    exception = e;//let's save this for after. It might just fuck things up terribly
                 }
             }
-        });
+
+            if(callback != null)
+                callback.call();
+
+            if(exception != null)
+                throw new RuntimeException(exception);
+        }
+    }
+
+    @Override
+    public void notifyListeners() {
+        notifyListeners(null);
     }
 
     @Override
@@ -162,11 +169,18 @@ public abstract class AbstractStoreImpl<State> implements Store<Object> {
     }
 
     @Override
-    public void waitFor(String[] storeNames, Callback callback) throws Exception {
-        Set<String> _storeNames = new HashSet<String>(Arrays.asList(storeNames));
+    public void waitFor(Class[] stores, Callback callback) throws Exception {
+        Set<Class> _stores = new HashSet<>(Arrays.asList(stores));
 
-        mDispatcher.waitFor(this.getClass().getName(), _storeNames, callback);
-    };
+        mDispatcher.waitFor(this.getClass(), _stores, callback);
+    }
+
+    @Override
+    public void waitFor(Class store, Callback callback) throws Exception {
+        waitFor(new Class[]{store}, callback);
+    }
+
+    ;
 
     public abstract State getState();
 

@@ -15,10 +15,17 @@ I currently need help in the following aspects:
 Until that is done, I won't be releasing it on Maven/JCenter.
 
 ### Version
-0.0.2
+0.0.3
 
 
 ### ChangeLog
+
+####0.0.3
+  - Added queue and background thread to handle dispatches off the main thread to increase UI performance.
+  - Store listener notification is no longer done on the main thread. UI changes need to be explicitly executed on the main thread.
+  - Added `ThreadUtils` helper to help run UI updates on the main thread from `onChanged` method
+  - Added `StoreListenerFragment` and `StoreListenerView` ase classes
+  - Renamed `StoreActivity` to `StoreListenerActivity`
 
 ####0.0.2
   - Notify store listeners on the UI thread

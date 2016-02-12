@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by user on 5/5/2015.
  */
-public class CollectionUtil {
+public class CollectionUtils {
 
     public static <T> List<T> intersection(List<T> arrayOne, List<T> arrayTwo)
     {

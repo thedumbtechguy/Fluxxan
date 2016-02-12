@@ -1,6 +1,5 @@
 package com.whisppa.droidflux;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,11 +8,11 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.whisppa.droidfluxlib.Flux;
-import com.whisppa.droidfluxlib.StoreListener;
-import com.whisppa.droidfluxlib.ui.StoreActivity;
+import com.whisppa.droidfluxlib.ui.StoreListenerActivity;
+import com.whisppa.droidfluxlib.utils.ThreadUtils;
 
 
-public class MainActivity extends StoreActivity {
+public class MainActivity extends StoreListenerActivity {
 
     private Button btn;
     private TextView txt;
@@ -48,7 +47,6 @@ public class MainActivity extends StoreActivity {
         });
 
 
-
         btn2 = (Button) findViewById(R.id.btn2);
         asyncBtn2 = (Button) findViewById(R.id.asyncBtn2);
         txt2 = (TextView) findViewById(R.id.txt2);
@@ -79,10 +77,10 @@ public class MainActivity extends StoreActivity {
     protected void onStop() {
         super.onStop();
 
-        MyStore store = (MyStore) MyApp.getFlux().getStore(MyStore.class);
+        MyStore store = MyApp.getFlux().getStore(MyStore.class);
         store.removeListener(this);
 
-        MyOtherStore otherStore = (MyOtherStore) MyApp.getFlux().getStore(MyOtherStore.class);
+        MyOtherStore otherStore = MyApp.getFlux().getStore(MyOtherStore.class);
         otherStore.removeListener(this);
     }
 
@@ -120,15 +118,19 @@ public class MainActivity extends StoreActivity {
 
     @Override
     public void onChanged() {
-        MyStore store = MyApp.getFlux().getStore(MyStore.class);
-        txt.setText(store.getState());
+        final MyStore store = MyApp.getFlux().getStore(MyStore.class);
+        final MyOtherStore.MyState state = MyApp.getFlux().getStore(MyOtherStore.class).getState();
 
-        MyOtherStore otherStore = MyApp.getFlux().getStore(MyOtherStore.class);
-        MyOtherStore.MyState state = otherStore.getState();
-        if(state.isLoading)
-            txt2.setText("Currently Loading User");
-        else if(state.hasLoaded)
-            txt2.setText(state.user);
+        ThreadUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                txt.setText(store.getState());
 
+                if(state.isLoading)
+                    txt2.setText("Currently Loading User");
+                else if(state.hasLoaded)
+                    txt2.setText(state.user);
+            }
+        });
     }
 }

@@ -23,6 +23,7 @@ public class MyActions extends AbstractActionsImpl {
         }
     }
 
+    private int num = 0;
     public void getUserAsync() {
         try {
             //notify the ui that we are loading
@@ -34,20 +35,20 @@ public class MyActions extends AbstractActionsImpl {
                 public void run(){
                     try {
                         Thread.sleep(2000);
+                        num++;
 
                         User bundle = new User();
-                        bundle.ID = new Random().nextInt();
-                        mDispatcher.dispatch(new Payload<User>(GET_USER_ASYNC_LOADED, bundle));
+                        bundle.ID = num;
+                        mDispatcher.dispatch(new Payload<>(GET_USER_ASYNC_LOADED, bundle));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }).start();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     public class User

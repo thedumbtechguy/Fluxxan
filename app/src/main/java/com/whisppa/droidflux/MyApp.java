@@ -14,7 +14,16 @@ public class MyApp extends Application {
 
     @Override
     public void onCreate() {
+        super.onCreate();
+
         DroidFlux = new Flux<MyActions>(new Store[]{new MyStore(), new MyOtherStore()}, new MyActions());
+        DroidFlux.getDispatcher().start();
+    }
+
+    public void onTerminate() {
+        super.onTerminate();
+
+        DroidFlux.getDispatcher().stop();
     }
 
     public static Flux<MyActions> getFlux() {

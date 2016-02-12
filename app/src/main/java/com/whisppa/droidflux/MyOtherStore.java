@@ -11,11 +11,14 @@ import java.util.Random;
  * Created by user on 5/8/2015.
  */
 public class MyOtherStore extends AbstractStoreImpl<MyOtherStore.MyState> {
+    private int num = 0;
+
     MyState myState = new MyState();
 
     @BindAction(MyActions.GET_USER)
     public void getUser(Object pl) {
-        myState.user = "User: " + new Random().nextInt();
+        num --;
+        myState.user = "User: " + num;
         myState.isLoading = false;
         myState.hasLoaded = true;
 

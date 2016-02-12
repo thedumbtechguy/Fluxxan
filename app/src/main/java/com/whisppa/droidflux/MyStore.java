@@ -11,11 +11,13 @@ import java.util.Random;
  * Created by user on 5/8/2015.
  */
 public class MyStore extends AbstractStoreImpl<String> {
-    String user = "User: Default";
+    String user = "User: ";
+    private int num = 0;
 
     @BindAction(MyActions.GET_USER)
     public void getUser(Object pl) {
-        user = "User: " + new Random().nextInt();
+        num++;
+        user = "User: " + num;
         this.notifyListeners();
     }
 
