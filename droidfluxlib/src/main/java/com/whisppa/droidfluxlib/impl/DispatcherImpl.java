@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -27,7 +27,7 @@ public class DispatcherImpl implements Dispatcher {
 
     private static final String TAG = "DroidFlux:Dispatcher";
 
-    protected final ConcurrentLinkedQueue<Payload> mDispatchQueue = new ConcurrentLinkedQueue<>();;
+    protected final LinkedBlockingQueue<Payload> mDispatchQueue = new LinkedBlockingQueue<>();;
     protected final ConcurrentHashMap<String, Store> mStores = new ConcurrentHashMap<>();
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
@@ -42,7 +42,7 @@ public class DispatcherImpl implements Dispatcher {
     @Override
     public void start() {
         if(isStarted) return;
-        
+
         mDispatchThread = new Thread(new DispatchThread());
         mDispatchThread.start();
         isStarted = true;
@@ -160,7 +160,7 @@ public class DispatcherImpl implements Dispatcher {
             throw new IllegalArgumentException("Can only dispatch actions with a valid 'Type' property");
         }
 
-        mDispatchQueue.add(payload);
+        mDispatchQueue.offer(payload);
     }
 
     public void waitFor(Class waitingStore, Set<Class> storeNames, Callback callback) throws Exception {
@@ -212,19 +212,19 @@ public class DispatcherImpl implements Dispatcher {
         @Override
         public void run() {
             boolean run = true;
+            Payload payload = null;
+
             while (run) {
                 if(mDispatchThread.isInterrupted()) return;
 
-                Payload payload = mDispatchQueue.poll();
-                if(payload != null) {
-                    _dispatch(payload);
-                }
-                else
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        run = false;
+                try {
+                    payload = mDispatchQueue.take();
+                    if(payload != null) {
+                        _dispatch(payload);
                     }
+                } catch (InterruptedException e) {
+                    run = false;
+                }
             }
         }
     }
