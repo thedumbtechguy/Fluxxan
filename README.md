@@ -1,24 +1,25 @@
-# DroidFlux
+# Fluxxan
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-DroidFlux-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786)
 
-DroidFlux is an Android port of the popular [Fluxxor](http://fluxxor.com) library that seeks to implement the [Flux Architecture](https://facebook.github.io/flux/) as popularised by Facebook.
-
-This library is direct port of Fluxxor and works a lot like it. It is currently highly experimental but I wish to develop it into a full fledged library. It is untested and I advise against using it in production.
+Fluxxan (originally DroidFlux) started as a direct Android port of the popular [Fluxxor](http://fluxxor.com) library and seeks to implement the [Flux Architecture](https://facebook.github.io/flux/) as popularised by Facebook.
+The library has evolved into a hybrid of the original Flux and [Redux](https://github.com/reactjs/redux), borrowing some of the great ideas from Redux while trying to be as close to the original dictates of Flux as much as possible.
 
 I currently need help in the following aspects:
   - Writing Tests
-  - Proper Concurrency
   - Performance Tuning
   - Documentation
 
-Until that is done, I won't be releasing it on Maven/JCenter.
 
-### Version
-0.0.3
+## Current Version
+0.1.0
 
+## ChangeLog
 
-### ChangeLog
+####0.1.0
+  - Completely overhauled the lbrary.
+  - Renamed to Fluxxan.
+  - Introduced concepts from Redux
 
 ####0.0.3
   - Added queue and background thread to handle dispatches off the main thread to increase UI performance.
@@ -37,9 +38,11 @@ Until that is done, I won't be releasing it on Maven/JCenter.
   - Initial Code Commit
 
 
-### Installation
+## Installation
 
 Simply clone the project and open in Android Studio. It contains a sample that illustrates a basic use. You can play around with it.
+
+##Documentation is currently not valid. Working on it at the moment.
 
 ### Actions
 

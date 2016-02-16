@@ -1,1 +1,1 @@
-include ':app', ':droidfluxlib'
+include ':app', ':fluxxan'
