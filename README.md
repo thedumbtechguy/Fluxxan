@@ -14,10 +14,31 @@ Starting at 0.1.0 Fluxxan follows [Semantic Versionioning](http://semver.org/).
 
 ## Installation
 
-Simply clone the project and open in Android Studio. It contains a sample that illustrates a basic use. You can play around with it.
+####Gradle
+
+Currently, Fluxxan is not available on maven/jcenter. You will need to use the manual installation in the interim.
+
+####Manual Installation
+Download the [aar artifact](artifacts/fluxxan.aar) in the [artifacts](artifacts/) directory and copy it into the libs directory of your app module.
+Specify `libs` as a repository in your root gradle file.
+
+    allprojects {
+        repositories {
+            ...
+            flatDir { dirs 'libs' }
+        }
+    }
+    
+Specify Fluxxan as dependency in your app's gradle file.
+
+    dependencies {
+        compile fileTree(dir: 'libs', include: ['*.jar'])
+        compile(name: 'fluxxan', ext: 'aar')
+        ...
+    }
 
 ##Documentation
- I won't attempt to teach you the concepts of Flux. There are enough articles on the internet for that. Instead, I will focus on showing you how to achieve it using Fluxxan.
+ I won't attempt to teach you the concepts of Flux. There are enough articles on the internet for that. Instead, I will focus on showing you how to achieve it using Fluxxan. Facebook has a great [introduction to flux here](https://facebook.github.io/flux/docs/overview.html).
 
 ### State
 The State  is the Single Source of Truth of your application. It a single object tree containing the entire app state.
@@ -26,9 +47,10 @@ Your `Reducer`s specify how each action transforms the state tree.
 
 The above concepts are borrowed from Redux.
 
-> Unlike Redux, Fluxxan does not force you to use an immutable state. However, doing so  will both improve your code and increase performance of your application.
+> Unlike Redux, Fluxxan does not force you to use an immutable state. However, doing so is greatly encouraged as it will both improve your code, debugging and increase the overall performance of your application. The state tree can be any object, even a POJO. It's your choice.
 
-A simple state tree can look like this.
+However, I'd like to stress again that making your state immutable will make your life that much easier. If you choose not to, we've got you covered. A couple of methods are provided to help you short circuit the dispatch process.
+Personally, I've found [Immutables](http://immutables.github.io/) to be a really great way to achieve Immutability. It's quick to setup and understand.
 
 ...
 
