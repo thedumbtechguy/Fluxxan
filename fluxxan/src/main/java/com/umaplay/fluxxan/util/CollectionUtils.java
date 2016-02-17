@@ -1,4 +1,4 @@
-package com.umaplay.fluxxan.utils;
+package com.umaplay.fluxxan.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;

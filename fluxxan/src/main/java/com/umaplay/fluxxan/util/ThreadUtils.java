@@ -1,7 +1,8 @@
-package com.umaplay.fluxxan.utils;
+package com.umaplay.fluxxan.util;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 
 /**
  * Created by user on 2/12/2016.
@@ -21,6 +22,10 @@ public class ThreadUtils {
             runnable.run();
         else
             new Handler(Looper.getMainLooper()).post(runnable);
+    }
+
+    public static void runInBackground(@NonNull final Runnable runnable) {
+        new Thread(runnable).start();
     }
 
     public static int getId() {

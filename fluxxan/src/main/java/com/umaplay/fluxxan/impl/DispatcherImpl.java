@@ -9,8 +9,8 @@ import com.umaplay.fluxxan.Payload;
 import com.umaplay.fluxxan.Reducer;
 import com.umaplay.fluxxan.StateListener;
 import com.umaplay.fluxxan.WaitCallback;
-import com.umaplay.fluxxan.utils.CollectionUtils;
-import com.umaplay.fluxxan.utils.ThreadUtils;
+import com.umaplay.fluxxan.util.CollectionUtils;
+import com.umaplay.fluxxan.util.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
