@@ -5,7 +5,8 @@ import android.app.Application;
 import com.umaplay.fluxxan.Dispatcher;
 import com.umaplay.fluxxan.Flux;
 import com.umaplay.fluxxan.impl.DispatcherImpl;
-import com.umaplay.fluxxandemo.flux.action.TodoActions;
+import com.umaplay.fluxxandemo.flux.actioncreator.TodoActionCreator;
+import com.umaplay.fluxxandemo.flux.model.AppState;
 import com.umaplay.fluxxandemo.flux.model.ImmutableAppState;
 import com.umaplay.fluxxandemo.flux.reducer.TodoReducer;
 
@@ -14,19 +15,19 @@ import com.umaplay.fluxxandemo.flux.reducer.TodoReducer;
  */
 public class App extends Application {
 
-    static Flux<ImmutableAppState, TodoActions> Fluxxan;
+    static Flux<AppState, TodoActionCreator> Fluxxan;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        ImmutableAppState state = ImmutableAppState.builder().build();
+        AppState state = ImmutableAppState.builder().build();
 
-        Fluxxan = new Flux<ImmutableAppState, TodoActions>(state, new TodoActions()) {
-            protected Dispatcher<ImmutableAppState> initDispatcher(ImmutableAppState state) {
-                return new DispatcherImpl<ImmutableAppState>(state) {
+        Fluxxan = new Flux<AppState, TodoActionCreator>(state, new TodoActionCreator()) {
+            protected Dispatcher<AppState> initDispatcher(AppState state) {
+                return new DispatcherImpl<AppState>(state) {
                     @Override
-                    public boolean hasStateChanged(ImmutableAppState newState, ImmutableAppState oldState) {
+                    public boolean hasStateChanged(AppState newState, AppState oldState) {
                         return newState != oldState;
                     }
                 };
@@ -43,7 +44,7 @@ public class App extends Application {
         Fluxxan.getDispatcher().stop();
     }
 
-    public static Flux<ImmutableAppState, TodoActions> getFlux() {
+    public static Flux<AppState, TodoActionCreator> getFlux() {
         return Fluxxan;
     }
 }

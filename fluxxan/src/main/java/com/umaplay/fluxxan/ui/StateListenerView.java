@@ -11,7 +11,7 @@ import com.umaplay.fluxxan.StateListener;
  * This class illustrates the use of Flux in views
  * All you need to do is extend the class or copy the code if you need to extend a View order than View itself like LinearLayout
  */
-abstract public class ReducerListenerView<State> extends View implements StateListener<State> {
+abstract public class StateListenerView<State> extends View implements StateListener<State> {
 
     //this mostly should return false
     //and should return true if your view needs to listen to change events even while hidden
@@ -21,7 +21,7 @@ abstract public class ReducerListenerView<State> extends View implements StateLi
 
     protected boolean mIsRegistered;
 
-    public ReducerListenerView(Context context) {
+    public StateListenerView(Context context) {
         super(context);
     }
 

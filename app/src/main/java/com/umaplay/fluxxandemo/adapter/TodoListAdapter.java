@@ -63,12 +63,12 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
                                 switch (which) {
                                     case 0:
                                         if(todo.getStatus().equals(Todo.Status.OPEN))
-                                            App.getFlux().getActions().closeTodo(todo);
+                                            App.getFlux().getActionCreator().closeTodo(todo);
                                         else
-                                            App.getFlux().getActions().openTodo(todo);
+                                            App.getFlux().getActionCreator().openTodo(todo);
                                         break;
                                     case 1:
-                                        App.getFlux().getActions().deleteTodo(todo);
+                                        App.getFlux().getActionCreator().deleteTodo(todo);
                                         break;
                                 }
                             }

@@ -1,14 +1,13 @@
 package com.umaplay.fluxxan.impl;
 
-import com.umaplay.fluxxan.Actions;
+import com.umaplay.fluxxan.Action;
+import com.umaplay.fluxxan.ActionCreator;
 import com.umaplay.fluxxan.Dispatcher;
-import com.umaplay.fluxxan.Payload;
-import com.umaplay.fluxxan.Reducer;
 
 /**
  * Created by user on 5/8/2015.
  */
-public class BaseActions implements Actions {
+public class BaseActionCreator implements ActionCreator {
     protected Dispatcher mDispatcher;
 
     @Override
@@ -17,7 +16,7 @@ public class BaseActions implements Actions {
     }
 
 
-    public void dispatch(Payload payload) {
-        mDispatcher.dispatch(payload);
+    public void dispatch(Action action) {
+        mDispatcher.dispatch(action);
     }
 }

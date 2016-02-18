@@ -14,11 +14,11 @@ public abstract class AppState {
     public abstract Map<String, Todo> getTodos();
 
     @Value.Default
-    public Visibility getVisibility() {
-        return Visibility.ALL;
+    public Filter getFilter() {
+        return Filter.ALL;
     }
 
-    public enum Visibility {
+    public enum Filter {
         ALL,
         OPEN,
         CLOSED

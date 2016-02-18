@@ -1,6 +1,6 @@
 package com.umaplay.fluxxan.ui;
 
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 
 import com.umaplay.fluxxan.Flux;
 import com.umaplay.fluxxan.StateListener;
@@ -8,17 +8,18 @@ import com.umaplay.fluxxan.StateListener;
 /**
  * Created by user on 6/4/2015.
  */
-abstract public class ReducerListenerFragment<State> extends Fragment implements StateListener<State> {
+abstract public class StateListenerActivity<State> extends AppCompatActivity implements StateListener<State> {
 
-     public void onStart() {
+    protected void onStart() {
         super.onStart();
         getFlux().addListener(this);
-     }
+    }
 
-    public void onStop() {
+    protected void onStop() {
         getFlux().removeListener(this);
         super.onStop();
     }
 
     protected abstract Flux getFlux();
+
 }

@@ -16,12 +16,12 @@ import java.util.List;
  * By default, we use the {@link DispatcherImpl} provided. This can be changed by overriding {@link #initDispatcher(Object)}
  *
  * @param <State>
- * @param <ActionsType>
+ * @param <ActionCreatorType>
  */
-public class Flux<State, ActionsType extends Actions> {
+public class Flux<State, ActionCreatorType extends ActionCreator> {
 
     private final Dispatcher<State> mDispatcher;
-    private final ActionsType mActions;
+    private final ActionCreatorType mActionCreator;
 
     /**
      * Create a new instance
@@ -29,21 +29,21 @@ public class Flux<State, ActionsType extends Actions> {
      */
     public Flux(@NonNull State state) {
         mDispatcher = initDispatcher(state);
-        mActions = null;
+        mActionCreator = null;
     }
 
     /**
-     * Create a new instance with optional Actions
-     * Actions are injected with the dispatcher instance
+     * Create a new instance with optional ActionCreator
+     * ActionCreator is injected with the dispatcher instance
      *
      * @param state The initial state tree
-     * @param actions The actions that will be returned by {@link #getActions()}
+     * @param actionCreator The actions that will be returned by {@link #getActionCreator()}
      */
-    public Flux(@NonNull State state, ActionsType actions) {
+    public Flux(@NonNull State state, ActionCreatorType actionCreator) {
         mDispatcher = initDispatcher(state);
 
-        actions.setDispatcher(mDispatcher);
-        mActions = actions;
+        actionCreator.setDispatcher(mDispatcher);
+        mActionCreator = actionCreator;
     }
 
     /**
@@ -58,11 +58,12 @@ public class Flux<State, ActionsType extends Actions> {
     }
 
     /**
-     * Get the actions passed in {@link #Flux(Object, Actions)}
-     * @return Actions object or null if not provided
+     * Get the actions passed in {@link #Flux(Object, com.umaplay.fluxxan.ActionCreator)}
+     * @return ActionCreatorType object or null if not provided
      */
-    public @Nullable ActionsType getActions() {
-        return mActions;
+    public @Nullable
+    ActionCreatorType getActionCreator() {
+        return mActionCreator;
     }
 
     /**

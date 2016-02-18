@@ -26,9 +26,9 @@ public interface Dispatcher<State> {
 
     /**
      * Dispatch an action
-     * @param payload A payload object containing the action type and the data payload
+     * @param action An action object containing the action type and the data action
      */
-    public void dispatch(@NonNull Payload payload);
+    public void dispatch(@NonNull Action action);
 
     /**
      * Get the current state

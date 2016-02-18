@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.umaplay.fluxxan.Action;
 import com.umaplay.fluxxan.Dispatcher;
-import com.umaplay.fluxxan.Payload;
 import com.umaplay.fluxxan.Reducer;
 import com.umaplay.fluxxan.StateListener;
 import com.umaplay.fluxxan.WaitCallback;
@@ -30,7 +30,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
     private static final String TAG = "DroidFlux:Dispatcher";
 
     protected State mState;
-    protected final LinkedBlockingQueue<Payload> mDispatchQueue = new LinkedBlockingQueue<>();
+    protected final LinkedBlockingQueue<Action> mDispatchQueue = new LinkedBlockingQueue<>();
     protected final ConcurrentHashMap<String, Reducer<State>> mReducers = new ConcurrentHashMap<>();
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
@@ -52,7 +52,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
         mListeners = Collections.synchronizedList(new ArrayList<StateListener<State>>());
     }
 
-    protected void _dispatch(@NonNull final Payload payload) {
+    protected void _dispatch(@NonNull final Action action) {
         ThreadUtils.ensureNotOnMain();
 
         String[] names = mReducers.keySet().toArray(new String[mReducers.size()]);
@@ -61,19 +61,19 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             reducer.reset();
         }
 
-        mCurrentActionType = payload.Type;
+        mCurrentActionType = action.Type;
         mWaitingToDispatch = new HashSet<>(mReducers.keySet());
 
         mIsDispatching.set(true);
 
         RuntimeException ex = null;
         try {
-            Log.i("DroidFlux:Dispatcher", String.format("[STARTED] dispatch of action [%s]", payload.Type));
-            doDispatchLoop(payload);
-            Log.i("DroidFlux:Dispatcher", String.format("[COMPLETED] dispatch of action [%s]", payload.Type));
+            Log.i("DroidFlux:Dispatcher", String.format("[STARTED] dispatch of action [%s]", action.Type));
+            doDispatchLoop(action);
+            Log.i("DroidFlux:Dispatcher", String.format("[COMPLETED] dispatch of action [%s]", action.Type));
         }
         catch (Exception e) {
-            Log.e("DroidFlux:Dispatcher", String.format("[FAILED] dispatch of action [%s]", payload.Type), e);
+            Log.e("DroidFlux:Dispatcher", String.format("[FAILED] dispatch of action [%s]", action.Type), e);
             ex = new RuntimeException(e);
         }
         finally {
@@ -85,7 +85,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
         if(ex != null) throw ex;
     }
 
-    protected synchronized void doDispatchLoop(Payload payload) throws Exception {
+    protected synchronized void doDispatchLoop(Action action) throws Exception {
         ThreadUtils.ensureNotOnMain();
 
         Reducer<State> dispatch;
@@ -109,7 +109,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
                 } else {
                     dispatch.setResolved(true);
 
-                    DispatchResult<State> result = mReducers.get(key).reduce(dispatchState, payload);
+                    DispatchResult<State> result = mReducers.get(key).reduce(dispatchState, action);
                     dispatchState = result.state;
 
                     if (result.handled) {
@@ -133,11 +133,11 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             mWaitingToDispatch.remove(removeFromDispatchQueue.get(i));
 
         if (mWaitingToDispatch.size() > 0) {
-            this.doDispatchLoop(payload);
+            this.doDispatchLoop(action);
         }
 
         if (!wasHandled) {
-            Log.d(TAG, String.format("An action of type [%s] was dispatched, but no reducer handled it", payload.Type));
+            Log.d(TAG, String.format("An action of type [%s] was dispatched, but no reducer handled it", action.Type));
         }
         else if(hasStateChanged(dispatchState, mState)){
             State oldstate = mState;
@@ -198,9 +198,9 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
      * Dispatching occurs on a dedicated background thread and are processed sequentially.
      *
      * @throws IllegalStateException if {@link DispatcherImpl#start} has not been called or it's called from within a dispatch cycle
-     * @throws IllegalArgumentException if payload type is empty. {@link TextUtils#isEmpty}
+     * @throws IllegalArgumentException if action type is empty. {@link TextUtils#isEmpty}
      */
-    public void dispatch(@NonNull Payload payload) {
+    public void dispatch(@NonNull Action action) {
         if(!isStarted) {
             throw new IllegalStateException("Dispatcher not started!");
         }
@@ -209,11 +209,11 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             throw new IllegalStateException("Cannot call dispatch while dispatching!");
         }
 
-        if (TextUtils.isEmpty(payload.Type)) {
+        if (TextUtils.isEmpty(action.Type)) {
             throw new IllegalArgumentException("Can only dispatch actions with a valid 'Type' property");
         }
 
-        mDispatchQueue.offer(payload);
+        mDispatchQueue.offer(action);
     }
 
     @Override
@@ -336,15 +336,15 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
         public void run() {
             mThreadId = ThreadUtils.getId();
             boolean run = true;
-            Payload payload;
+            Action action;
 
             while (run) {
                 if(mDispatchThread.isInterrupted()) return;
 
                 try {
-                    payload = mDispatchQueue.take();
-                    if(payload != null) {
-                        _dispatch(payload);
+                    action = mDispatchQueue.take();
+                    if(action != null) {
+                        _dispatch(action);
                     }
                 } catch (InterruptedException e) {
                     run = false;

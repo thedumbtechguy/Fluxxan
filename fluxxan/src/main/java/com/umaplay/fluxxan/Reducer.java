@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * This interface defines a reducer
- * The reducer takes in the State tree and an action {@link Payload} and returns a new State tree based on this
+ * The reducer takes in the State tree and an action {@link Action} and returns a new State tree based on this
  * Ideally, the reducer should not mutate the state but return a new instance of it if needs to be changed
  * This increases performance by allowing short-circuiting of the notification process
  * @see DispatcherImpl#hasStateChanged(Object, Object)
@@ -21,11 +21,11 @@ public interface Reducer<State> {
      * If state is not changed, original state can be returned
      *
      * @param state The current State tree
-     * @param payload The action payload
+     * @param action The action action
      * @return A {@link com.umaplay.fluxxan.impl.DispatcherImpl.DispatchResult} to indicate if the action was handled and the state
      * @throws Exception
      */
-    public DispatcherImpl.DispatchResult<State> reduce(State state, Payload payload) throws Exception;
+    public DispatcherImpl.DispatchResult<State> reduce(State state, Action action) throws Exception;
 
     /**
      * Check if reducer has been called during current dispatch cycle. Used by {@link Dispatcher} internally.

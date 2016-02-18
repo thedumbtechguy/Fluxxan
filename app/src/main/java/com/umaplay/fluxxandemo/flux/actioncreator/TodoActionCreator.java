@@ -1,14 +1,14 @@
-package com.umaplay.fluxxandemo.flux.action;
+package com.umaplay.fluxxandemo.flux.actioncreator;
 
-import com.umaplay.fluxxan.Payload;
-import com.umaplay.fluxxan.impl.BaseActions;
+import com.umaplay.fluxxan.Action;
+import com.umaplay.fluxxan.impl.BaseActionCreator;
 import com.umaplay.fluxxandemo.flux.model.AppState;
 import com.umaplay.fluxxandemo.flux.model.Todo;
 
 /**
  * Created by user on 5/8/2015.
  */
-public class TodoActions extends BaseActions {
+public class TodoActionCreator extends BaseActionCreator {
     public static final String ADD_TODO = "ADD_TODO";
     public static final String CLOSE_TODO = "CLOSE_TODO";
     public static final String OPEN_TODO = "OPEN_TODO";
@@ -31,29 +31,29 @@ public class TodoActions extends BaseActions {
         dispatch(Creator.deleteTodo(todo));
     }
 
-    public void changeVisibility(AppState.Visibility state) {
+    public void changeVisibility(AppState.Filter state) {
         dispatch(Creator.changeVisibility(state));
     }
 
     public static class Creator {
-        public static Payload<String> addTodo(String todo) {
-            return new Payload<>(ADD_TODO, todo);
+        public static Action<String> addTodo(String todo) {
+            return new Action<>(ADD_TODO, todo);
         }
 
-        public static Payload<Todo> openTodo(Todo todo) {
-            return new Payload<>(OPEN_TODO, todo);
+        public static Action<Todo> openTodo(Todo todo) {
+            return new Action<>(OPEN_TODO, todo);
         }
 
-        public static Payload<Todo> closeTodo(Todo todo) {
-            return new Payload<>(CLOSE_TODO, todo);
+        public static Action<Todo> closeTodo(Todo todo) {
+            return new Action<>(CLOSE_TODO, todo);
         }
 
-        public static Payload<Todo> deleteTodo(Todo todo) {
-            return new Payload<>(DELETE_TODO, todo);
+        public static Action<Todo> deleteTodo(Todo todo) {
+            return new Action<>(DELETE_TODO, todo);
         }
 
-        public static Payload<AppState.Visibility> changeVisibility(AppState.Visibility state) {
-            return new Payload<>(CHANGE_VISIBILITY, state);
+        public static Action<AppState.Filter> changeVisibility(AppState.Filter state) {
+            return new Action<>(CHANGE_VISIBILITY, state);
         }
     }
 }

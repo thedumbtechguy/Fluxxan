@@ -2,7 +2,7 @@ package com.umaplay.fluxxandemo.flux.reducer;
 
 import com.umaplay.fluxxan.annotation.BindAction;
 import com.umaplay.fluxxan.impl.BaseAnnotatedReducer;
-import com.umaplay.fluxxandemo.flux.action.TodoActions;
+import com.umaplay.fluxxandemo.flux.actioncreator.TodoActionCreator;
 import com.umaplay.fluxxandemo.flux.model.AppState;
 import com.umaplay.fluxxandemo.flux.model.ImmutableAppState;
 import com.umaplay.fluxxandemo.flux.model.ImmutableTodo;
@@ -15,10 +15,10 @@ import java.util.UUID;
 /**
  * Created by user on 5/8/2015.
  */
-public class TodoReducer extends BaseAnnotatedReducer<ImmutableAppState> {
+public class TodoReducer extends BaseAnnotatedReducer<AppState> {
 
-    @BindAction(TodoActions.ADD_TODO)
-    public ImmutableAppState addTodo(ImmutableAppState state, String todo) {
+    @BindAction(TodoActionCreator.ADD_TODO)
+    public ImmutableAppState addTodo(AppState state, String todo) {
         Todo iTodo = ImmutableTodo.builder()
                 .uid(UUID.randomUUID().toString())
                 .title(todo)
@@ -32,13 +32,12 @@ public class TodoReducer extends BaseAnnotatedReducer<ImmutableAppState> {
                 .build();
     }
 
-    @BindAction(TodoActions.OPEN_TODO)
-    public ImmutableAppState openTodo(ImmutableAppState state, Todo todo) {
+    @BindAction(TodoActionCreator.OPEN_TODO)
+    public ImmutableAppState openTodo(AppState state, Todo todo) {
         Todo iTodo = ImmutableTodo.builder()
                 .from(todo)
                 .status(Todo.Status.OPEN)
                 .build();
-
 
         return ImmutableAppState.builder()
                 .from(state)
@@ -46,8 +45,8 @@ public class TodoReducer extends BaseAnnotatedReducer<ImmutableAppState> {
                 .build();
     }
 
-    @BindAction(TodoActions.CLOSE_TODO)
-    public ImmutableAppState closeTodo(ImmutableAppState state, Todo todo) {
+    @BindAction(TodoActionCreator.CLOSE_TODO)
+    public ImmutableAppState closeTodo(AppState state, Todo todo) {
         Todo iTodo = ImmutableTodo.builder()
                 .from(todo)
                 .status(Todo.Status.CLOSED)
@@ -61,8 +60,8 @@ public class TodoReducer extends BaseAnnotatedReducer<ImmutableAppState> {
     }
 
 
-    @BindAction(TodoActions.DELETE_TODO)
-    public ImmutableAppState deleteTodo(ImmutableAppState state, Todo todo) {
+    @BindAction(TodoActionCreator.DELETE_TODO)
+    public ImmutableAppState deleteTodo(AppState state, Todo todo) {
 
         Map<String, Todo> todos = new LinkedHashMap<>(state.getTodos());
         todos.remove(todo.getUid());
@@ -73,11 +72,11 @@ public class TodoReducer extends BaseAnnotatedReducer<ImmutableAppState> {
                 .build();
     }
 
-    @BindAction(TodoActions.CHANGE_VISIBILITY)
-    public ImmutableAppState changeVisibiity(ImmutableAppState state, AppState.Visibility visiblilty) {
+    @BindAction(TodoActionCreator.CHANGE_VISIBILITY)
+    public ImmutableAppState changeVisibiity(AppState state, AppState.Filter filter) {
         return ImmutableAppState.builder()
                 .from(state)
-                .visibility(visiblilty)
+                .filter(filter)
                 .build();
     }
 

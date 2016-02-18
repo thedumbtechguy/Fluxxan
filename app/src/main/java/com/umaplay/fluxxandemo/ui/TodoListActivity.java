@@ -15,19 +15,18 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.umaplay.fluxxan.Flux;
-import com.umaplay.fluxxan.ui.ReducerListenerActivity;
+import com.umaplay.fluxxan.ui.StateListenerActivity;
 import com.umaplay.fluxxan.util.ThreadUtils;
 import com.umaplay.fluxxandemo.App;
 import com.umaplay.fluxxandemo.R;
 import com.umaplay.fluxxandemo.adapter.TodoListAdapter;
-import com.umaplay.fluxxandemo.flux.action.TodoActions;
+import com.umaplay.fluxxandemo.flux.actioncreator.TodoActionCreator;
 import com.umaplay.fluxxandemo.flux.model.AppState;
-import com.umaplay.fluxxandemo.flux.model.ImmutableAppState;
 import com.umaplay.fluxxandemo.flux.model.Todo;
 
 import java.util.ArrayList;
 
-public class TodoListActivity extends ReducerListenerActivity<AppState> {
+public class TodoListActivity extends StateListenerActivity<AppState> {
 
     private TodoListAdapter mAdapter;
 
@@ -63,7 +62,7 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String text = input.getText().toString();
-                        getFlux().getActions().addTodo(text);
+                        getFlux().getActionCreator().addTodo(text);
 
                         dialog.dismiss();
                     }
@@ -83,7 +82,7 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_todos, menu);
-        menu.findItem(R.id.change_visibility).setTitle("SHOW " + getFlux().getState().getVisibility().toString());
+        menu.findItem(R.id.change_visibility).setTitle("SHOW " + getFlux().getState().getFilter().toString());
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -93,7 +92,7 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.change_visibility:
-                AppState.Visibility visibility = getFlux().getState().getVisibility();
+                AppState.Filter filter = getFlux().getState().getFilter();
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Filter");
@@ -105,21 +104,21 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
                 int i = 0;
                 String[] items = new String[2];
 
-                final AppState.Visibility[] states = new AppState.Visibility[2];
+                final AppState.Filter[] states = new AppState.Filter[2];
 
-                if(!visibility.equals(AppState.Visibility.ALL)) {
+                if(!filter.equals(AppState.Filter.ALL)) {
                     items[i] = "All Todos";
-                    states[i] = AppState.Visibility.ALL;
+                    states[i] = AppState.Filter.ALL;
                     i++;
                 }
-                if(!visibility.equals(AppState.Visibility.OPEN)) {
+                if(!filter.equals(AppState.Filter.OPEN)) {
                     items[i] = "Open Todos";
-                    states[i] = AppState.Visibility.OPEN;
+                    states[i] = AppState.Filter.OPEN;
                     i++;
                 }
-                if(!visibility.equals(AppState.Visibility.CLOSED)) {
+                if(!filter.equals(AppState.Filter.CLOSED)) {
                     items[i] = "Closed Todos";
-                    states[i] = AppState.Visibility.CLOSED;
+                    states[i] = AppState.Filter.CLOSED;
                     i++;
                 }
 
@@ -127,7 +126,7 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getFlux().getActions().changeVisibility(states[which]);
+                                getFlux().getActionCreator().changeVisibility(states[which]);
                             }
                         });
                 builder.show();
@@ -138,7 +137,7 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
     }
 
     @Override
-    protected Flux<ImmutableAppState, TodoActions> getFlux() {
+    protected Flux<AppState, TodoActionCreator> getFlux() {
         return App.getFlux();
     }
 
@@ -149,21 +148,20 @@ public class TodoListActivity extends ReducerListenerActivity<AppState> {
 
     @Override
     public void onStateChanged(final AppState appState) {
+        ArrayList<Todo> showTodos;
 
-        ArrayList<Todo> showTodos = null;
 
-
-        AppState.Visibility vb = appState.getVisibility();
-        if(vb.equals(AppState.Visibility.ALL)) {
+        AppState.Filter vb = appState.getFilter();
+        if(vb.equals(AppState.Filter.ALL)) {
             showTodos = new ArrayList<>(appState.getTodos().values());
         }
         else {
             showTodos = new ArrayList<Todo>();
 
             for (Todo todo : appState.getTodos().values()) {
-                if(todo.getStatus().equals(Todo.Status.CLOSED) && vb.equals(AppState.Visibility.CLOSED))
+                if(todo.getStatus().equals(Todo.Status.CLOSED) && vb.equals(AppState.Filter.CLOSED))
                     showTodos.add(todo);
-                else if(todo.getStatus().equals(Todo.Status.OPEN) && vb.equals(AppState.Visibility.OPEN))
+                else if(todo.getStatus().equals(Todo.Status.OPEN) && vb.equals(AppState.Filter.OPEN))
                     showTodos.add(todo);
             }
         }
