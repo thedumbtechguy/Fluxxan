@@ -21,27 +21,28 @@ Currently, Fluxxan is not available on maven/jcenter. You will need to use the m
 ####Manual Installation
 Download the [aar artifact](artifacts/fluxxan.aar) in the [artifacts](artifacts/) directory and copy it into the libs directory of your app module.
 Specify `libs` as a repository in your root gradle file.
-
+```groovy
     allprojects {
         repositories {
             ...
             flatDir { dirs 'libs' }
         }
     }
-    
+```    
 Specify Fluxxan as dependency in your app's gradle file.
-
+```groovy
     dependencies {
         compile fileTree(dir: 'libs', include: ['*.jar'])
         compile(name: 'fluxxan', ext: 'aar')
         ...
     }
-
+```
 ##Introduction
  I won't attempt to teach you the concepts of Flux. There are enough articles on the internet for that. Facebook has a great [introduction to flux here](https://facebook.github.io/flux/docs/overview.html) to get you started.
  I will instead focus on showing you how to achieve Flux using Fluxxan. In this introduction tutorial, I will walk you through building the sample Todo app included in the source.
 
 Fluxxan is composed of the
+
 1. State
 2. Dispatcher
 3. Actions
@@ -57,14 +58,16 @@ The `Dispatcher` calls all registered `Reducer`s with the `State` and `Action ` 
 ### State
 The `State` is the Single Source of Truth of your application. It a single object tree containing the entire app state.
 
-> Unlike Redux, Fluxxan does not force you to use an immutable state. 
-> However, doing so is greatly encouraged as it will both improve your code, debugging and increase the overall performance of your application. The state tree can be any object, even a POJO. 
-> If you choose not to go Immutable, we've got you covered. A couple of methods are provided to help you short circuit the dispatch process.
+> Unlike Redux, Fluxxan does not force you to use an immutable state even though the the default implementation assumes you do.
+> It is greatly encouraged you do as it will both improve your code, debugging and increase the overall performance of your application. There is a reason most of the new Flux implementations are going immutable.
+> If you choose not to go Immutable, you will need to override couple of methods to help you short circuit the dispatch process.
 
-For immutability, I've found [Immutables](http://immutables.github.io/) to be a really great way to achieve Immutability. It's quick to setup and understand.
+I've found [Immutables](http://immutables.github.io/) to be a really great way to achieve Immutability. It's quick to setup and understand.
 
-Our Todo app will hold a list of Todo items and a Filter to define which Todos to show. We will use `Immutables` to define our `AppState`.
+It’s a good idea to think of its shape before writing any code. 
+For our Todo app will hold a list of Todo items and a Filter to define which Todos to show.
 
+```java
     @Value.Immutable
     public abstract class AppState {
     
@@ -82,8 +85,9 @@ Our Todo app will hold a list of Todo items and a Filter to define which Todos t
             CLOSED
         }
     }
+```
 We also define our `Todo` object as an Immutable.
-
+```java
     @Value.Immutable
     public abstract class Todo {
         @Value
@@ -100,15 +104,15 @@ We also define our `Todo` object as an Immutable.
             CLOSED
         }
     }
-
+```
  When we build our project, `Immutables` will generate concrete immutable versions of our `AppState` and `Todo` models prefixed with "Immutable" to give `ImmutableAppState` and `ImmutableTodo`.
 
 ###Actions
-`Action`s are objects that define a `Type` and a data `Payload`. Actions in Fluxxan extend [Action](fluxxan/src/main/java/com/umaplay/fluxxan/Action.java).
+[Action](fluxxan/src/main/java/com/umaplay/fluxxan/Action.java)s are objects that define a `Type` and a data `Payload`.
 
 The action `Type` is a unique string to identify the given action and the `Payload` is any object that you wish to pass to the `Reducer`.
 
-`Action`s are created by `ActionCreator`s and passed to the 	`Dispatcher`.	
+`Action`s are created by `ActionCreator`s and passed to the `Dispatcher` which in turn passes it to each reducer.
 
 ###Action Creators
 As the name implies, `Action Creators` are methods that create and dispatch `Actions`. 
@@ -116,14 +120,16 @@ As the name implies, `Action Creators` are methods that create and dispatch `Act
 >Fluxxan does not dictate how you create your `Action Creators`. You have full freedom in this regard. They can be static methods or instance methods. 
 
 We have some guidelines which you can follow. 
+
 1. Create a class to group related action creators. e.g. in our app we will create a `TodoActionCreator` class.
 2. Use instances of each creator rather than static methods.
 3. Each creator should have a nested `Creator` class that handles the actual creation of the `Action`s using static methods. This gives our `Action Creator`s two roles and allows to dispatch multiple actions or async tasks while still ensuring we can test our `Action`s easily. 
 4. Nested creator classes should be composed of pure static methods.  They should return the same `Action` each time when given the same arguments. They should cause no side effects.
 5. Don't limit your creators to only dispatch `Actions`. They are an opportunity to centralize all actions that are taken from the ui. e.g. In a music player app, you can have a `PlayerActionCreator` class that has a  `play()` method that tells the media player to start playing and does not dispatch an action. Technically, this is not an `Action Creator` but it's nice that we can have all interactions with the player in one single place.
 
-Let's see what we have in our `Todo` app (simplified for brevity).
+Let's see what we have in our `Todo` app (*simplified for brevity*).
 
+```java
     public class TodoActionCreator extends BaseActionCreator {
         public static final String ADD_TODO = "ADD_TODO";
     
@@ -138,6 +144,7 @@ Let's see what we have in our `Todo` app (simplified for brevity).
             }
         }
     }
+```
 
 We extend [BaseActionCreator](fluxxan/src/main/java/com/umaplay/fluxxan/impl/BaseActionCreator.java) which gives us `dispatch(Action)`.
 
@@ -145,6 +152,7 @@ As we can see, when we call `addTodo`, our creator gets the relevant action from
 
 In pseudo code it would look something like this:
 
+```java
     public void addTodo(String todo) {
    	    //save on the server
 		postToWebservice(todo)
@@ -152,18 +160,118 @@ In pseudo code it would look something like this:
 			.onSuccess(c => dispatch(Creator.addTodoSuccess(todo)))
 			.onFailure(c => dispatch(Creator.addTodoFailed(todo)));
     }
+```
 
 Since we are using a dedicated Creator, this allows us to test the actions without having to mock the dispatcher or the web service. We can simply do anywhere in our code:
 
+```java
     dispatch(TodoActionCreator.Creator.addTodoStarted(todo));
     dispatch(TodoActionCreator.Creator.addTodoSuccess(todo));
     dispatch(TodoActionCreator.Creator.addTodoFailed(todo));
-...
+```
+
+###Reducers
+`Reducer`s describe the how our `State` changes in response to an `Action`. Like ActionCreator Creators, Reducers need to be pure. That means, no side effects, no calling of an API etc. They should rely solely on the Action to transform the state.
+Given the same arguments, Reducers should return the same result each time.
+
+To register a `Reducer`, you need to call `Dispatcher.registerReducer(Reducer)` and `Dispatcher.unregisterReducer(Reducer)` if you wish to remove it.
+
+`Reducer`s implement the [Reducer](fluxxan/src/main/java/com/umaplay/fluxxan/Reducer.java) interface. 
+We provide two abstract implementations: `BaseReducer` and `BaseAnnotatedReducer` both coupled to the default `Dispatcher` implementation.
+
+`BaseReducer` requires you to implement `reduce(State, Action)` in whuch you can check if you want to handle that action `Type`.
+
+```java
+     @Override
+     public DispatchResult<State> reduce(State state, Action action) throws Exception {
+    
+           if(action.Type.equals(TodoActionCreator.ADD_TODO)) {
+               //do your thing here
+               
+               //return the new state and indicate that we handled this action
+               return new DispatchResult<>(newState, true);
+           }
+    
+           return new DispatchResult<>(state, false);
+       }
+```
+
+`BaseAnnotatedReducer` uses reflection to determine handlers for each action and calls them for you. This keeps your code cleaner and more concise.
+You annotate the method with `@BindAction(String)` and ensure the method has the signature `State methodName(State state, PayloadType payload)`.
+
+This is what our reducer looks like.
+
+```java
+    public class TodoReducer extends BaseAnnotatedReducer<AppState> {
+    
+        @BindAction(TodoActionCreator.ADD_TODO)
+        public AppState addTodo(AppState state, String todo) {
+            Todo iTodo = ImmutableTodo.builder()
+                    .uid(UUID.randomUUID().toString())
+                    .title(todo)
+                    .status(Todo.Status.OPEN)
+                    .build();
+    
+            return ImmutableAppState.builder()
+                    .from(state)
+                    .putTodos(iTodo.getUid(), iTodo)
+                    .build();
+        }
+    }
+```
+
+### StateListener
+A `StateListener`  register's itself with the `Dispatcher` to be notified each time the `State` changes. It must implement the `StateListener` interface. It can be any object including an Activity, Fragment, View or Service (running in the same process) etc.
+
+A listener is add using the `Dispatcher.addListener(StateListener)` and `Dispatcher.removeListener(StateListener)` to remove it.
+
+`hasStateChanged(State newState, State oldState)` is a convenience method to help short-circuit the dispatch process if we aren't using an immutable state. You can localize your checks to certain nodes of the state tree specific to this listener. 
+Since we assume your state is immutable, the default implementations use `return newState != oldState`. If this returns false, `onStateChanged` is not called.  
+
+`onStateChanged(final State state)` is called when the state has changed. This is not called on the `Main` or `UI` thread but on a dedicated background thread. If you wish to make any changes to any UI element, you will need to post a runnable. We provide you a utility method for this using `ThreadUtils.runOnMain(Runnable)`. 
+This design choice was made intentionally to allow you to be able to do any processing (like loops) you wish off the main thread before updating the UI. This allows the UI to remain responsive all the time. 	 
+
+We have base implementations like `StateListenerActivity`, `StateListenerFragment` and `StateListenerView` that take care of handling the lifecycle and registering and unregistering of the listener.
+
+
+### Dispatcher
+We saved the best for last.
+
+The dispatcher is the engine of Fluxxan. It manages the state, reducers and listeners, handles the dispatching of actions and the subsequent notifying of listeners.
+
+After we create our dispatcher, we need to keep a reference to it so we can register `Reducer`s and `StateListener`s as well as dispatch `Action`s.
+We need to call `start` and `stop` on the dispatcher to start or stop it.
+
+Ideally, this would be done in a custom android Application so we can get a reference to it anywhere in our code.
+
+The dispatcher checks if states have changed before notifying listeners, but since it assumes state is immutable, you will need to override it's `hasStateChanged(State newState, State oldState)` method to provide your own functionality.
+By default, it uses, `return newState != oldState`.
+
+####Fluxxan
+We provide you a coordinator to help manage the dispatcher. It's called `Fluxxan`.
+Fluxxan is used in default implementations so instead of dealing with the `Dispatcher` directly (you can if you choose to) we use `Fluxxan`.
+`Fluxxan` provides proxy methods that call `Dispatcher`. By default, it uses the `DispatcherImpl` implementation.
+
+In our app, let's see what this looks like.
+
+```java
+    AppState state = ImmutableAppState.builder().build();
+    
+    Fluxxan = new Fluxxan<AppState, TodoActionCreator>(state, new TodoActionCreator());
+    Fluxxan.registerReducer(new TodoReducer());
+    
+    Fluxxan.start();
+```
+
+
+### Contributing
+
+Thank you for taking the time to contribute.
+But before you do, please read our [contribution guidelines](CONTRIBUTING.MD). They are simple, we promise.
+
 
 ###Todo
   - Writing Tests
-  - Performance Tuning
-  - Documentation
 
 	
 ### License
