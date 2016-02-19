@@ -21,21 +21,23 @@ Currently, Fluxxan is not available on maven/jcenter. You will need to use the m
 ####Manual Installation
 Download the [aar artifact](artifacts/fluxxan.aar) in the [artifacts](artifacts/) directory and copy it into the libs directory of your app module.
 Specify `libs` as a repository in your root gradle file.
-
+```groovy
     allprojects {
         repositories {
             ...
             flatDir { dirs 'libs' }
         }
     }
+```
     
 Specify Fluxxan as dependency in your app's gradle file.
-
+```groovy
     dependencies {
         compile fileTree(dir: 'libs', include: ['*.jar'])
         compile(name: 'fluxxan', ext: 'aar')
         ...
     }
+```
 
 ##Introduction
  I won't attempt to teach you the concepts of Flux. There are enough articles on the internet for that. Facebook has a great [introduction to flux here](https://facebook.github.io/flux/docs/overview.html) to get you started.
@@ -64,7 +66,7 @@ The `State` is the Single Source of Truth of your application. It a single objec
 For immutability, I've found [Immutables](http://immutables.github.io/) to be a really great way to achieve Immutability. It's quick to setup and understand.
 
 Our Todo app will hold a list of Todo items and a Filter to define which Todos to show. We will use `Immutables` to define our `AppState`.
-
+```java
     @Value.Immutable
     public abstract class AppState {
     
@@ -82,8 +84,9 @@ Our Todo app will hold a list of Todo items and a Filter to define which Todos t
             CLOSED
         }
     }
+```
 We also define our `Todo` object as an Immutable.
-
+```java
     @Value.Immutable
     public abstract class Todo {
         @Value
@@ -100,7 +103,7 @@ We also define our `Todo` object as an Immutable.
             CLOSED
         }
     }
-
+```
  When we build our project, `Immutables` will generate concrete immutable versions of our `AppState` and `Todo` models prefixed with "Immutable" to give `ImmutableAppState` and `ImmutableTodo`.
 
 ###Actions
@@ -123,7 +126,7 @@ We have some guidelines which you can follow.
 5. Don't limit your creators to only dispatch `Actions`. They are an opportunity to centralize all actions that are taken from the ui. e.g. In a music player app, you can have a `PlayerActionCreator` class that has a  `play()` method that tells the media player to start playing and does not dispatch an action. Technically, this is not an `Action Creator` but it's nice that we can have all interactions with the player in one single place.
 
 Let's see what we have in our `Todo` app (simplified for brevity).
-
+```java
     public class TodoActionCreator extends BaseActionCreator {
         public static final String ADD_TODO = "ADD_TODO";
     
@@ -138,13 +141,13 @@ Let's see what we have in our `Todo` app (simplified for brevity).
             }
         }
     }
-
+```
 We extend [BaseActionCreator](fluxxan/src/main/java/com/umaplay/fluxxan/impl/BaseActionCreator.java) which gives us `dispatch(Action)`.
 
 As we can see, when we call `addTodo`, our creator gets the relevant action from the nested creator and dispatches it. We can do neat things in `addTodo` if we wanted like post to a web service.
 
 In pseudo code it would look something like this:
-
+```java
     public void addTodo(String todo) {
    	    //save on the server
 		postToWebservice(todo)
@@ -152,14 +155,14 @@ In pseudo code it would look something like this:
 			.onSuccess(c => dispatch(Creator.addTodoSuccess(todo)))
 			.onFailure(c => dispatch(Creator.addTodoFailed(todo)));
     }
-
+```
 Since we are using a dedicated Creator, this allows us to test the actions without having to mock the dispatcher or the web service. We can simply do anywhere in our code:
-
+```java
     dispatch(TodoActionCreator.Creator.addTodoStarted(todo));
     dispatch(TodoActionCreator.Creator.addTodoSuccess(todo));
     dispatch(TodoActionCreator.Creator.addTodoFailed(todo));
 ...
-
+```
 ###Todo
   - Writing Tests
   - Performance Tuning
