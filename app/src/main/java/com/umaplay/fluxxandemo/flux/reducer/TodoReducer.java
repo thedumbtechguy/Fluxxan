@@ -18,13 +18,12 @@ import java.util.UUID;
 public class TodoReducer extends BaseAnnotatedReducer<AppState> {
 
     @BindAction(TodoActionCreator.ADD_TODO)
-    public ImmutableAppState addTodo(AppState state, String todo) {
+    public AppState addTodo(AppState state, String todo) {
         Todo iTodo = ImmutableTodo.builder()
                 .uid(UUID.randomUUID().toString())
                 .title(todo)
                 .status(Todo.Status.OPEN)
                 .build();
-
 
         return ImmutableAppState.builder()
                 .from(state)
@@ -33,7 +32,7 @@ public class TodoReducer extends BaseAnnotatedReducer<AppState> {
     }
 
     @BindAction(TodoActionCreator.OPEN_TODO)
-    public ImmutableAppState openTodo(AppState state, Todo todo) {
+    public AppState openTodo(AppState state, Todo todo) {
         Todo iTodo = ImmutableTodo.builder()
                 .from(todo)
                 .status(Todo.Status.OPEN)
@@ -46,7 +45,7 @@ public class TodoReducer extends BaseAnnotatedReducer<AppState> {
     }
 
     @BindAction(TodoActionCreator.CLOSE_TODO)
-    public ImmutableAppState closeTodo(AppState state, Todo todo) {
+    public AppState closeTodo(AppState state, Todo todo) {
         Todo iTodo = ImmutableTodo.builder()
                 .from(todo)
                 .status(Todo.Status.CLOSED)
@@ -61,7 +60,7 @@ public class TodoReducer extends BaseAnnotatedReducer<AppState> {
 
 
     @BindAction(TodoActionCreator.DELETE_TODO)
-    public ImmutableAppState deleteTodo(AppState state, Todo todo) {
+    public AppState deleteTodo(AppState state, Todo todo) {
 
         Map<String, Todo> todos = new LinkedHashMap<>(state.getTodos());
         todos.remove(todo.getUid());
@@ -72,8 +71,8 @@ public class TodoReducer extends BaseAnnotatedReducer<AppState> {
                 .build();
     }
 
-    @BindAction(TodoActionCreator.CHANGE_VISIBILITY)
-    public ImmutableAppState changeVisibiity(AppState state, AppState.Filter filter) {
+    @BindAction(TodoActionCreator.CHANGE_FILTER)
+    public AppState changeFilter(AppState state, AppState.Filter filter) {
         return ImmutableAppState.builder()
                 .from(state)
                 .filter(filter)

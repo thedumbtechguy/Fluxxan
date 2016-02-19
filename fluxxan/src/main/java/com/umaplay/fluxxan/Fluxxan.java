@@ -18,7 +18,7 @@ import java.util.List;
  * @param <State>
  * @param <ActionCreatorType>
  */
-public class Flux<State, ActionCreatorType extends ActionCreator> {
+public class Fluxxan<State, ActionCreatorType extends ActionCreator> {
 
     private final Dispatcher<State> mDispatcher;
     private final ActionCreatorType mActionCreator;
@@ -27,7 +27,7 @@ public class Flux<State, ActionCreatorType extends ActionCreator> {
      * Create a new instance
      * @param state The initial state tree
      */
-    public Flux(@NonNull State state) {
+    public Fluxxan(@NonNull State state) {
         mDispatcher = initDispatcher(state);
         mActionCreator = null;
     }
@@ -39,7 +39,7 @@ public class Flux<State, ActionCreatorType extends ActionCreator> {
      * @param state The initial state tree
      * @param actionCreator The actions that will be returned by {@link #getActionCreator()}
      */
-    public Flux(@NonNull State state, ActionCreatorType actionCreator) {
+    public Fluxxan(@NonNull State state, ActionCreatorType actionCreator) {
         mDispatcher = initDispatcher(state);
 
         actionCreator.setDispatcher(mDispatcher);
@@ -58,7 +58,7 @@ public class Flux<State, ActionCreatorType extends ActionCreator> {
     }
 
     /**
-     * Get the actions passed in {@link #Flux(Object, com.umaplay.fluxxan.ActionCreator)}
+     * Get the actions passed in {@link #Fluxxan(Object, com.umaplay.fluxxan.ActionCreator)}
      * @return ActionCreatorType object or null if not provided
      */
     public @Nullable
@@ -124,5 +124,19 @@ public class Flux<State, ActionCreatorType extends ActionCreator> {
      */
     public boolean removeListener(StateListener<State> stateListener) {
         return mDispatcher.removeListener(stateListener);
+    }
+
+    /**
+     * @see Dispatcher#start()
+     */
+    public void start() {
+        mDispatcher.start();
+    }
+
+    /**
+     * @see Dispatcher#stop()
+     */
+    public void stop() {
+        mDispatcher.stop();
     }
 }

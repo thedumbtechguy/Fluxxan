@@ -3,7 +3,7 @@ package com.umaplay.fluxxandemo;
 import android.app.Application;
 
 import com.umaplay.fluxxan.Dispatcher;
-import com.umaplay.fluxxan.Flux;
+import com.umaplay.fluxxan.Fluxxan;
 import com.umaplay.fluxxan.impl.DispatcherImpl;
 import com.umaplay.fluxxandemo.flux.actioncreator.TodoActionCreator;
 import com.umaplay.fluxxandemo.flux.model.AppState;
@@ -15,7 +15,7 @@ import com.umaplay.fluxxandemo.flux.reducer.TodoReducer;
  */
 public class App extends Application {
 
-    static Flux<AppState, TodoActionCreator> Fluxxan;
+    static com.umaplay.fluxxan.Fluxxan<AppState, TodoActionCreator> Fluxxan;
 
     @Override
     public void onCreate() {
@@ -23,7 +23,7 @@ public class App extends Application {
 
         AppState state = ImmutableAppState.builder().build();
 
-        Fluxxan = new Flux<AppState, TodoActionCreator>(state, new TodoActionCreator()) {
+        Fluxxan = new Fluxxan<AppState, TodoActionCreator>(state, new TodoActionCreator()) {
             protected Dispatcher<AppState> initDispatcher(AppState state) {
                 return new DispatcherImpl<AppState>(state) {
                     @Override
@@ -35,16 +35,16 @@ public class App extends Application {
         };
         Fluxxan.registerReducer(new TodoReducer());
 
-        Fluxxan.getDispatcher().start();
+        Fluxxan.start();
     }
 
     public void onTerminate() {
         super.onTerminate();
 
-        Fluxxan.getDispatcher().stop();
+        Fluxxan.stop();
     }
 
-    public static Flux<AppState, TodoActionCreator> getFlux() {
+    public static com.umaplay.fluxxan.Fluxxan<AppState, TodoActionCreator> getFlux() {
         return Fluxxan;
     }
 }

@@ -22,10 +22,10 @@ public interface Reducer<State> {
      *
      * @param state The current State tree
      * @param action The action action
-     * @return A {@link com.umaplay.fluxxan.impl.DispatcherImpl.DispatchResult} to indicate if the action was handled and the state
+     * @return A {@link DispatchResult} to indicate if the action was handled and the state
      * @throws Exception
      */
-    public DispatcherImpl.DispatchResult<State> reduce(State state, Action action) throws Exception;
+    public DispatchResult<State> reduce(State state, Action action) throws Exception;
 
     /**
      * Check if reducer has been called during current dispatch cycle. Used by {@link Dispatcher} internally.

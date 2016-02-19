@@ -3,15 +3,16 @@ package com.umaplay.fluxxan.ui;
 import android.content.Context;
 import android.view.View;
 
-import com.umaplay.fluxxan.Flux;
+import com.umaplay.fluxxan.ActionCreator;
+import com.umaplay.fluxxan.Fluxxan;
 import com.umaplay.fluxxan.StateListener;
 
 /**
  * Created by frostymarvelous on 6/4/2015.
- * This class illustrates the use of Flux in views
+ * This class illustrates the use of Fluxxan in views
  * All you need to do is extend the class or copy the code if you need to extend a View order than View itself like LinearLayout
  */
-abstract public class StateListenerView<State> extends View implements StateListener<State> {
+abstract public class StateListenerView<State, ActionCreatorType extends ActionCreator> extends View implements StateListener<State> {
 
     //this mostly should return false
     //and should return true if your view needs to listen to change events even while hidden
@@ -35,12 +36,13 @@ abstract public class StateListenerView<State> extends View implements StateList
         if(mIsRegistered) return;
 
         mIsRegistered = true;
-        getFlux().addListener(this);;
+        getFlux().addListener(this);
+        onStateChanged(getFlux().getState());//let's refesh the ui
     }
 
     protected void unregisterReducer() {
         mIsRegistered = false;
-        getFlux().removeListener(this);;
+        getFlux().removeListener(this);
     }
 
     protected void onDetachedFromWindow() {
@@ -58,5 +60,10 @@ abstract public class StateListenerView<State> extends View implements StateList
         }
     }
 
-    protected abstract Flux getFlux();
+    protected abstract Fluxxan<State, ActionCreatorType> getFlux();
+
+    @Override
+    public boolean hasStateChanged(State newState, State oldState) {
+        return newState != oldState;
+    }
 }

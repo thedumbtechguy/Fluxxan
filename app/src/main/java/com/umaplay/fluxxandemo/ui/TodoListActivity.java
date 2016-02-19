@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.umaplay.fluxxan.Flux;
+import com.umaplay.fluxxan.Fluxxan;
 import com.umaplay.fluxxan.ui.StateListenerActivity;
 import com.umaplay.fluxxan.util.ThreadUtils;
 import com.umaplay.fluxxandemo.App;
@@ -26,7 +26,7 @@ import com.umaplay.fluxxandemo.flux.model.Todo;
 
 import java.util.ArrayList;
 
-public class TodoListActivity extends StateListenerActivity<AppState> {
+public class TodoListActivity extends StateListenerActivity<AppState, TodoActionCreator> {
 
     private TodoListAdapter mAdapter;
 
@@ -137,13 +137,8 @@ public class TodoListActivity extends StateListenerActivity<AppState> {
     }
 
     @Override
-    protected Flux<AppState, TodoActionCreator> getFlux() {
+    protected Fluxxan<AppState, TodoActionCreator> getFlux() {
         return App.getFlux();
-    }
-
-    @Override
-    public boolean hasStateChanged(AppState newState, AppState oldState) {
-        return newState != oldState;
     }
 
     @Override

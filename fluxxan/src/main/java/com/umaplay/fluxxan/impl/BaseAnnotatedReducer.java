@@ -3,6 +3,7 @@ package com.umaplay.fluxxan.impl;
 import android.text.TextUtils;
 
 import com.umaplay.fluxxan.Action;
+import com.umaplay.fluxxan.DispatchResult;
 import com.umaplay.fluxxan.annotation.BindAction;
 
 import java.lang.annotation.Annotation;
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * It does this by overriding {@link #reduce(Object, Action)} and calling relevant methods to handle the action
  * During instantiation, methods annotated with {@link BindAction} are read and stored in a {@link ConcurrentHashMap} with the action type as the key
  * When an action is dispatched, the action type is checked against this map and if found, the method is invoked using reflection.
- * Each method should have the same signature and return type as {@link #reduce(Object, Action)} or it will fail at runtime
+ * Each bound method should the signature `State methodName(State state, PayloadType payload)` or it will fail at runtime.
  *
  * Inheriting classes must remember to call `super()` in the constructor to ensure that annotations are processed
  *
@@ -59,15 +60,15 @@ public abstract class BaseAnnotatedReducer<State> extends BaseReducer<State> {
     }
 
     @Override
-    public DispatcherImpl.DispatchResult<State> reduce(State state, Action action) throws Exception {
+    public DispatchResult<State> reduce(State state, Action action) throws Exception {
         if(mActionMap.containsKey(action.Type)) {
             Method method;
             method = mActionMap.get(action.Type);
 
-            return new DispatcherImpl.DispatchResult<>((State) method.invoke(this, state, action.Payload), true);
+            return new DispatchResult<>((State) method.invoke(this, state, action.Payload), true);
         }
 
-        return new DispatcherImpl.DispatchResult<>(state, false);
+        return new DispatchResult<>(state, false);
     }
 
     protected void bindAction(String actionType, Method method) {

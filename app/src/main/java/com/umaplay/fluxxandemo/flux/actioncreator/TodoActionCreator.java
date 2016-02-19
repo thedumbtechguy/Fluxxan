@@ -13,7 +13,7 @@ public class TodoActionCreator extends BaseActionCreator {
     public static final String CLOSE_TODO = "CLOSE_TODO";
     public static final String OPEN_TODO = "OPEN_TODO";
     public static final String DELETE_TODO = "DELETE_TODO";
-    public static final String CHANGE_VISIBILITY = "CHANGE_VISIBILITY";
+    public static final String CHANGE_FILTER = "CHANGE_FILTER";
 
     public void addTodo(String todo) {
         dispatch(Creator.addTodo(todo));
@@ -53,7 +53,7 @@ public class TodoActionCreator extends BaseActionCreator {
         }
 
         public static Action<AppState.Filter> changeVisibility(AppState.Filter state) {
-            return new Action<>(CHANGE_VISIBILITY, state);
+            return new Action<>(CHANGE_FILTER, state);
         }
     }
 }

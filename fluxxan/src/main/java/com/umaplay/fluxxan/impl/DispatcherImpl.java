@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.umaplay.fluxxan.Action;
+import com.umaplay.fluxxan.DispatchResult;
 import com.umaplay.fluxxan.Dispatcher;
 import com.umaplay.fluxxan.Reducer;
 import com.umaplay.fluxxan.StateListener;
@@ -326,7 +327,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
      */
     @Override
     public boolean hasStateChanged(State newState, State oldState) {
-        return true;
+        return newState != oldState;
     }
 
     //------ inner classes
@@ -350,16 +351,6 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
                     run = false;
                 }
             }
-        }
-    }
-
-    public final static class DispatchResult<State> {
-        public final boolean handled;
-        public final State state;
-
-        public DispatchResult(State state, boolean handled) {
-            this.handled = handled;
-            this.state = state;
         }
     }
 }

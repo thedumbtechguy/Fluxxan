@@ -1,7 +1,7 @@
 package com.umaplay.fluxxan;
 
 /**
- * An Action that can be passed to {@link Flux#Flux(Object, ActionCreator)}
+ * An Action that can be passed to {@link Fluxxan#Fluxxan(Object, ActionCreator)}
  */
 public interface ActionCreator {
     /**
