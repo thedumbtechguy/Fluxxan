@@ -42,6 +42,7 @@ Specify Fluxxan as dependency in your app's gradle file.
  I will instead focus on showing you how to achieve Flux using Fluxxan. In this introduction tutorial, I will walk you through building the sample Todo app included in the source.
 
 Fluxxan is composed of the
+
 1. State
 2. Dispatcher
 3. Actions
@@ -119,6 +120,7 @@ As the name implies, `Action Creators` are methods that create and dispatch `Act
 >Fluxxan does not dictate how you create your `Action Creators`. You have full freedom in this regard. They can be static methods or instance methods. 
 
 We have some guidelines which you can follow. 
+
 1. Create a class to group related action creators. e.g. in our app we will create a `TodoActionCreator` class.
 2. Use instances of each creator rather than static methods.
 3. Each creator should have a nested `Creator` class that handles the actual creation of the `Action`s using static methods. This gives our `Action Creator`s two roles and allows to dispatch multiple actions or async tasks while still ensuring we can test our `Action`s easily. 
