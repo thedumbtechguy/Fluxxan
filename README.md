@@ -260,7 +260,7 @@ In our app, let's see what this looks like.
     
     Fluxxan.start();
 ```
- 
+
 
 ### Contributing
 
