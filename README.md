@@ -58,7 +58,7 @@ The `Dispatcher` calls all registered `Reducer`s with the `State` and `Action ` 
 ### State
 The `State` is the Single Source of Truth of your application. It a single object tree containing the entire app state.
 
-> Unlike Redux, Fluxxan does not force you to use an immutable state even though the the default implementation assumes you do.
+> Unlike Redux, Fluxxan does not force you to use an immutable state even though the default implementation assumes you do.
 > It is greatly encouraged you do as it will both improve your code, debugging and increase the overall performance of your application. There is a reason most of the new Flux implementations are going immutable.
 > If you choose not to go Immutable, you will need to override couple of methods to help you short circuit the dispatch process.
 
