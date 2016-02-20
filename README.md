@@ -220,6 +220,9 @@ This is what our reducer looks like.
     }
 ```
 
+You can call `Dispathcer.waitFor` or the convenience method provided by `BaseReducer` and by extension `BaseAnnotatedReducer`.  
+This allows the reducer to ensure that other reducers run before it.
+
 ### StateListener
 A `StateListener`  register's itself with the `Dispatcher` to be notified each time the `State` changes. It must implement the `StateListener` interface. It can be any object including an Activity, Fragment, View or Service (running in the same process) etc.
 
@@ -246,6 +249,8 @@ Ideally, this would be done in a custom android Application so we can get a refe
 
 The dispatcher checks if states have changed before notifying listeners, but since it assumes state is immutable, you will need to override it's `hasStateChanged(State newState, State oldState)` method to provide your own functionality.
 By default, it uses, `return newState != oldState`.
+
+>The dispatcher allows us to provide the ability for a `Reducer` to wait for other reducers. This is an important feature in Flux not required in Redux. 
 
 ####Fluxxan
 We provide you a coordinator to help manage the dispatcher. It's called `Fluxxan`.
