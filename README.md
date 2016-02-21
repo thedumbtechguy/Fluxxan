@@ -7,19 +7,26 @@ The library has evolved into a hybrid of the original Flux and [Redux](https://g
 I ended up with something that looks like Flux, but works a lot like Redux.
 
 
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Fluxxan-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Fluxxan-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786) [![Download](https://api.bintray.com/packages/frostymarvelous/maven/fluxxan/images/download.svg) ](https://bintray.com/frostymarvelous/maven/fluxxan/_latestVersion) 
 
 ### Current Version: 0.1.0
-Starting at 0.1.0 Fluxxan follows [Semantic Versionioning](http://semver.org/).
+
+Fluxxan follows [Semantic Versionioning](http://semver.org/).
+
+[![](https://www.bintray.com/docs/images/bintray_badge_color.png)](https://bintray.com/frostymarvelous/maven/fluxxan/view?source=watch)
+
 
 ## Installation
 
 ####Gradle
+Fluxxan is available on jcenter.
 
-Currently, Fluxxan is not available on maven/jcenter. You will need to use the manual installation in the interim.
+```gradle
+compile 'com.umaplay.oss:fluxxan:0.1.0'
+```
 
 ####Manual Installation
-Download the [aar artifact](artifacts/fluxxan.aar) in the [artifacts](artifacts/) directory and copy it into the libs directory of your app module.
+Download the [aar artifact](artifacts/fluxxan.aar) from the [artifacts](artifacts/) directory and copy it into the libs directory of your app module.
 Specify `libs` as a repository in your root gradle file.
 ```groovy
     allprojects {
@@ -58,7 +65,7 @@ The `Dispatcher` calls all registered `Reducer`s with the `State` and `Action ` 
 ### State
 The `State` is the Single Source of Truth of your application. It a single object tree containing the entire app state.
 
-> Unlike Redux, Fluxxan does not force you to use an immutable state even though the the default implementation assumes you do.
+> Unlike Redux, Fluxxan does not force you to use an immutable state even though the default implementation assumes you do.
 > It is greatly encouraged you do as it will both improve your code, debugging and increase the overall performance of your application. There is a reason most of the new Flux implementations are going immutable.
 > If you choose not to go Immutable, you will need to override couple of methods to help you short circuit the dispatch process.
 
@@ -220,6 +227,9 @@ This is what our reducer looks like.
     }
 ```
 
+You can call `Dispathcer.waitFor` or the convenience method provided by `BaseReducer` and by extension `BaseAnnotatedReducer`.  
+This allows the reducer to ensure that other reducers run before it.
+
 ### StateListener
 A `StateListener`  register's itself with the `Dispatcher` to be notified each time the `State` changes. It must implement the `StateListener` interface. It can be any object including an Activity, Fragment, View or Service (running in the same process) etc.
 
@@ -246,6 +256,8 @@ Ideally, this would be done in a custom android Application so we can get a refe
 
 The dispatcher checks if states have changed before notifying listeners, but since it assumes state is immutable, you will need to override it's `hasStateChanged(State newState, State oldState)` method to provide your own functionality.
 By default, it uses, `return newState != oldState`.
+
+>The dispatcher allows us to provide the ability for a `Reducer` to wait for other reducers. This is an important feature in Flux not required in Redux. 
 
 ####Fluxxan
 We provide you a coordinator to help manage the dispatcher. It's called `Fluxxan`.
@@ -275,4 +287,4 @@ But before you do, please read our [contribution guidelines](CONTRIBUTING.MD). T
 
 	
 ### License
-The MIT License
+MIT
