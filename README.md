@@ -9,7 +9,7 @@ I ended up with something that looks like Flux, but works a lot like Redux.
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Fluxxan-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786) [![Download](https://api.bintray.com/packages/frostymarvelous/maven/fluxxan/images/download.svg) ](https://bintray.com/frostymarvelous/maven/fluxxan/_latestVersion) 
 
-### Current Version: 0.1.0
+### Current Version: 0.1.1
 
 Fluxxan follows [Semantic Versionioning](http://semver.org/).
 
@@ -22,7 +22,7 @@ Fluxxan follows [Semantic Versionioning](http://semver.org/).
 Fluxxan is available on jcenter.
 
 ```gradle
-compile 'com.umaplay.oss:fluxxan:0.1.0'
+compile 'com.umaplay.oss:fluxxan:0.1.1'
 ```
 
 ####Manual Installation

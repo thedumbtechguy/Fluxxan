@@ -1,6 +1,9 @@
 
 ## ChangeLog
 
+####0.1.1
+  - Fixed bug in `ThreadUtils.getId`
+  
 ####0.1.0
   - Completely overhauled the lbrary.
   - Renamed to Fluxxan.

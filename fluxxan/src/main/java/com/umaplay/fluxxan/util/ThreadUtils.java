@@ -29,7 +29,7 @@ public class ThreadUtils {
     }
 
     public static int getId() {
-        return android.os.Process.getThreadPriority(android.os.Process.myTid());
+        return android.os.Process.myTid();
     }
 
     public static class DispatchOnMainThreadException extends RuntimeException {}

@@ -15,7 +15,7 @@ ext {
     siteUrl = 'https://github.com/frostymarvelous/Fluxxan'
     gitUrl = 'https://github.com/frostymarvelous/Fluxxan.git'
 
-    libraryVersion = '0.1.0'
+    libraryVersion = '0.1.1'
 
     developerId = 'frostymarvelous'
     developerName = 'Stefan Froelich'
@@ -34,7 +34,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 23
         versionCode 4
-        versionName "0.1.0"
+        versionName "0.1.1"
     }
     buildTypes {
         release {
