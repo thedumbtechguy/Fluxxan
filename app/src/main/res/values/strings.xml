@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Fluxxan Demo</string>
+    <string name="no_todos">No Todos</string>
+    <string name="filter">Filter</string>
+</resources>
