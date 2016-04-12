@@ -15,7 +15,7 @@ import com.umaplay.fluxxandemo.flux.reducer.TodoReducer;
  */
 public class App extends Application {
 
-    static com.umaplay.fluxxan.Fluxxan<AppState, TodoActionCreator> Fluxxan;
+    static com.umaplay.fluxxan.Fluxxan<AppState> Fluxxan;
 
     @Override
     public void onCreate() {
@@ -23,7 +23,7 @@ public class App extends Application {
 
         AppState state = ImmutableAppState.builder().build();
 
-        Fluxxan = new Fluxxan<AppState, TodoActionCreator>(state, new TodoActionCreator()) {
+        Fluxxan = new Fluxxan<AppState>(state) {
             protected Dispatcher<AppState> initDispatcher(AppState state) {
                 return new DispatcherImpl<AppState>(state) {
                     @Override
@@ -44,7 +44,7 @@ public class App extends Application {
         Fluxxan.stop();
     }
 
-    public static com.umaplay.fluxxan.Fluxxan<AppState, TodoActionCreator> getFlux() {
+    public static com.umaplay.fluxxan.Fluxxan<AppState> getFlux() {
         return Fluxxan;
     }
 }

@@ -2,6 +2,7 @@ package com.umaplay.fluxxandemo.flux.actioncreator;
 
 import com.umaplay.fluxxan.Action;
 import com.umaplay.fluxxan.impl.BaseActionCreator;
+import com.umaplay.fluxxandemo.App;
 import com.umaplay.fluxxandemo.flux.model.AppState;
 import com.umaplay.fluxxandemo.flux.model.Todo;
 
@@ -14,6 +15,20 @@ public class TodoActionCreator extends BaseActionCreator {
     public static final String OPEN_TODO = "OPEN_TODO";
     public static final String DELETE_TODO = "DELETE_TODO";
     public static final String CHANGE_FILTER = "CHANGE_FILTER";
+
+    private static TodoActionCreator INSTANCE;
+
+    private TodoActionCreator() {
+        App.getFlux().inject(this);
+    }
+
+    public static TodoActionCreator instance() {
+        if(INSTANCE == null) {
+            INSTANCE = new TodoActionCreator();
+        }
+
+        return INSTANCE;
+    }
 
     public void addTodo(String todo) {
         dispatch(Creator.addTodo(todo));

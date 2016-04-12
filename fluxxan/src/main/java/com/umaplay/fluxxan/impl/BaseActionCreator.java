@@ -17,6 +17,9 @@ public class BaseActionCreator implements ActionCreator {
 
 
     public void dispatch(Action action) {
+        if(mDispatcher == null)
+            throw new IllegalStateException("Dispatcher has not been set on this creator");
+
         mDispatcher.dispatch(action);
     }
 }

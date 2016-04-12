@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.umaplay.fluxxandemo.App;
 import com.umaplay.fluxxandemo.R;
+import com.umaplay.fluxxandemo.flux.actioncreator.TodoActionCreator;
 import com.umaplay.fluxxandemo.flux.model.Todo;
 
 import java.util.List;
@@ -63,12 +64,12 @@ public class TodoListAdapter extends RecyclerView.Adapter<TodoListAdapter.TodoVi
                                 switch (which) {
                                     case 0:
                                         if(todo.getStatus().equals(Todo.Status.OPEN))
-                                            App.getFlux().getActionCreator().closeTodo(todo);
+                                            TodoActionCreator.instance().closeTodo(todo);
                                         else
-                                            App.getFlux().getActionCreator().openTodo(todo);
+                                            TodoActionCreator.instance().openTodo(todo);
                                         break;
                                     case 1:
-                                        App.getFlux().getActionCreator().deleteTodo(todo);
+                                        TodoActionCreator.instance().deleteTodo(todo);
                                         break;
                                 }
                             }

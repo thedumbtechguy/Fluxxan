@@ -26,7 +26,7 @@ import com.umaplay.fluxxandemo.flux.model.Todo;
 
 import java.util.ArrayList;
 
-public class TodoListActivity extends StateListenerActivity<AppState, TodoActionCreator> {
+public class TodoListActivity extends StateListenerActivity<AppState> {
 
     private TodoListAdapter mAdapter;
 
@@ -62,7 +62,7 @@ public class TodoListActivity extends StateListenerActivity<AppState, TodoAction
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String text = input.getText().toString();
-                        getFlux().getActionCreator().addTodo(text);
+                        TodoActionCreator.instance().addTodo(text);
 
                         dialog.dismiss();
                     }
@@ -126,7 +126,7 @@ public class TodoListActivity extends StateListenerActivity<AppState, TodoAction
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getFlux().getActionCreator().changeVisibility(states[which]);
+                                TodoActionCreator.instance().changeVisibility(states[which]);
                             }
                         });
                 builder.show();
@@ -137,7 +137,7 @@ public class TodoListActivity extends StateListenerActivity<AppState, TodoAction
     }
 
     @Override
-    protected Fluxxan<AppState, TodoActionCreator> getFlux() {
+    protected Fluxxan<AppState> getFlux() {
         return App.getFlux();
     }
 

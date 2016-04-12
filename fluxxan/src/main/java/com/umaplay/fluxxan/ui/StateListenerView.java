@@ -12,7 +12,7 @@ import com.umaplay.fluxxan.StateListener;
  * This class illustrates the use of Fluxxan in views
  * All you need to do is extend the class or copy the code if you need to extend a View order than View itself like LinearLayout
  */
-abstract public class StateListenerView<State, ActionCreatorType extends ActionCreator> extends View implements StateListener<State> {
+abstract public class StateListenerView<State> extends View implements StateListener<State> {
 
     //this mostly should return false
     //and should return true if your view needs to listen to change events even while hidden
@@ -60,7 +60,7 @@ abstract public class StateListenerView<State, ActionCreatorType extends ActionC
         }
     }
 
-    protected abstract Fluxxan<State, ActionCreatorType> getFlux();
+    protected abstract Fluxxan<State> getFlux();
 
     @Override
     public boolean hasStateChanged(State newState, State oldState) {

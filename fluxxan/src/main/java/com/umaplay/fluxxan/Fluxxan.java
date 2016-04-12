@@ -16,12 +16,10 @@ import java.util.List;
  * By default, we use the {@link DispatcherImpl} provided. This can be changed by overriding {@link #initDispatcher(Object)}
  *
  * @param <State>
- * @param <ActionCreatorType>
  */
-public class Fluxxan<State, ActionCreatorType extends ActionCreator> {
+public class Fluxxan<State> {
 
     private final Dispatcher<State> mDispatcher;
-    private final ActionCreatorType mActionCreator;
 
     /**
      * Create a new instance
@@ -29,21 +27,6 @@ public class Fluxxan<State, ActionCreatorType extends ActionCreator> {
      */
     public Fluxxan(@NonNull State state) {
         mDispatcher = initDispatcher(state);
-        mActionCreator = null;
-    }
-
-    /**
-     * Create a new instance with optional ActionCreator
-     * ActionCreator is injected with the dispatcher instance
-     *
-     * @param state The initial state tree
-     * @param actionCreator The actions that will be returned by {@link #getActionCreator()}
-     */
-    public Fluxxan(@NonNull State state, ActionCreatorType actionCreator) {
-        mDispatcher = initDispatcher(state);
-
-        actionCreator.setDispatcher(mDispatcher);
-        mActionCreator = actionCreator;
     }
 
     /**
@@ -58,20 +41,18 @@ public class Fluxxan<State, ActionCreatorType extends ActionCreator> {
     }
 
     /**
-     * Get the actions passed in {@link #Fluxxan(Object, com.umaplay.fluxxan.ActionCreator)}
-     * @return ActionCreatorType object or null if not provided
-     */
-    public @Nullable
-    ActionCreatorType getActionCreator() {
-        return mActionCreator;
-    }
-
-    /**
      * Get the dispatcher
      * @return The dispatcher
      */
     public Dispatcher getDispatcher() {
         return mDispatcher;
+    }
+
+    /**
+     * Inject dispatcher into ActionCreator
+     */
+    public void inject(ActionCreator ac) {
+        ac.setDispatcher(getDispatcher());
     }
 
 

@@ -9,7 +9,7 @@ import com.umaplay.fluxxan.StateListener;
 /**
  * Created by user on 6/4/2015.
  */
-abstract public class StateListenerFragment<State, ActionCreatorType extends ActionCreator> extends Fragment implements StateListener<State> {
+abstract public class StateListenerFragment<State> extends Fragment implements StateListener<State> {
 
      public void onStart() {
         super.onStart();
@@ -23,7 +23,7 @@ abstract public class StateListenerFragment<State, ActionCreatorType extends Act
         super.onStop();
     }
 
-    protected abstract Fluxxan<State, ActionCreatorType> getFlux();
+    protected abstract Fluxxan<State> getFlux();
 
     @Override
     public boolean hasStateChanged(State newState, State oldState) {
