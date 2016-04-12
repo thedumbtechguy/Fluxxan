@@ -1,6 +1,6 @@
 # Fluxxan
 
-Fluxxan is an Android implementation of the Flux Architecture that combines concepts from both Fluxxor and Redux.
+Fluxxan is an Android implementation of the Flux Architecture that combines concepts from both Fluxxor and Redux with minimal dependencies and support for Android SDK 8.
 
 Originally DroidFlux, it started as a direct Android port of the popular [Fluxxor](http://fluxxor.com) library seeking to implement the [Flux Architecture](https://facebook.github.io/flux/) as popularised by Facebook for Android.
 The library has evolved into a hybrid of the original Flux and [Redux](https://github.com/reactjs/redux), borrowing some of the great ideas from Redux while trying to be as close to the original dictates of Flux as much as possible. 
@@ -9,7 +9,7 @@ I ended up with something that looks like Flux, but works a lot like Redux.
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Fluxxan-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786) [![Download](https://api.bintray.com/packages/frostymarvelous/maven/fluxxan/images/download.svg) ](https://bintray.com/frostymarvelous/maven/fluxxan/_latestVersion) 
 
-### Current Version: 0.1.1
+### Current Version: 1.0.0
 
 Fluxxan follows [Semantic Versionioning](http://semver.org/).
 
@@ -22,11 +22,12 @@ Fluxxan follows [Semantic Versionioning](http://semver.org/).
 Fluxxan is available on jcenter.
 
 ```gradle
-compile 'com.umaplay.oss:fluxxan:0.1.1'
+compile 'com.umaplay.oss:fluxxan:1.0.0'
 ```
 
 ####Manual Installation
-Download the [aar artifact](artifacts/fluxxan.aar) from the [artifacts](artifacts/) directory and copy it into the libs directory of your app module.
+Download the [aar artifact](artifacts/fluxxan-1.0.0.aar) from the [artifacts](artifacts/) directory
+and copy it into the libs directory of your app module.
 Specify `libs` as a repository in your root gradle file.
 ```groovy
     allprojects {
@@ -40,7 +41,7 @@ Specify Fluxxan as dependency in your app's gradle file.
 ```groovy
     dependencies {
         compile fileTree(dir: 'libs', include: ['*.jar'])
-        compile(name: 'fluxxan', ext: 'aar')
+        compile(name: 'fluxxan-1.0.0', ext: 'aar')
         ...
     }
 ```
@@ -153,7 +154,7 @@ Let's see what we have in our `Todo` app (*simplified for brevity*).
     }
 ```
 
-We extend [BaseActionCreator](fluxxan/src/main/java/com/umaplay/fluxxan/impl/BaseActionCreator.java) which gives us `dispatch(Action)`.
+We extend [BaseActionCreator](fluxxan/src/main/java/com/umaplay/fluxxan/impl/BaseActionCreator.java) which gives us `dispatch(Action)`. Remember to set the dispatcher on your Action Creator after instantiation using `setDispatcher(Dispatcher)` or `Fluxxan.inject(ActionCreator)`
 
 As we can see, when we call `addTodo`, our creator gets the relevant action from the nested creator and dispatches it. We can do neat things in `addTodo` if we wanted like post to a web service.
 
@@ -178,7 +179,7 @@ Since we are using a dedicated Creator, this allows us to test the actions witho
 ```
 
 ###Reducers
-`Reducer`s describe the how our `State` changes in response to an `Action`. Like ActionCreator Creators, Reducers need to be pure. That means, no side effects, no calling of an API etc. They should rely solely on the Action to transform the state.
+`Reducer`s describe how our `State` changes in response to an `Action`. Like ActionCreator Creators, Reducers need to be pure. That means, no side effects, no calling of an API etc. They should rely solely on the Action to transform the state.
 Given the same arguments, Reducers should return the same result each time.
 
 To register a `Reducer`, you need to call `Dispatcher.registerReducer(Reducer)` and `Dispatcher.unregisterReducer(Reducer)` if you wish to remove it.
@@ -231,9 +232,10 @@ You can call `Dispathcer.waitFor` or the convenience method provided by `BaseRed
 This allows the reducer to ensure that other reducers run before it.
 
 ### StateListener
-A `StateListener`  register's itself with the `Dispatcher` to be notified each time the `State` changes. It must implement the `StateListener` interface. It can be any object including an Activity, Fragment, View or Service (running in the same process) etc.
+A `StateListener` register's itself with the `Dispatcher` to be notified each time the `State` changes. It must implement the `StateListener` interface. It can be any object including an Activity, Fragment, View or Service (running in the same process) etc.
 
-A listener is add using the `Dispatcher.addListener(StateListener)` and `Dispatcher.removeListener(StateListener)` to remove it.
+A listener is added using the `Dispatcher.addListener(StateListener)` and `Dispatcher
+.removeListener(StateListener)` to remove it.
 
 `hasStateChanged(State newState, State oldState)` is a convenience method to help short-circuit the dispatch process if we aren't using an immutable state. You can localize your checks to certain nodes of the state tree specific to this listener. 
 Since we assume your state is immutable, the default implementations use `return newState != oldState`. If this returns false, `onStateChanged` is not called.  
@@ -269,7 +271,7 @@ In our app, let's see what this looks like.
 ```java
     AppState state = ImmutableAppState.builder().build();
     
-    Fluxxan = new Fluxxan<AppState, TodoActionCreator>(state, new TodoActionCreator());
+    Fluxxan = new Fluxxan<AppState>(state);
     Fluxxan.registerReducer(new TodoReducer());
     
     Fluxxan.start();
@@ -284,6 +286,7 @@ But before you do, please read our [contribution guidelines](CONTRIBUTING.MD). T
 
 ###Todo
   - Writing Tests
+  - Specify Proguard rules
 
 	
 ### License
