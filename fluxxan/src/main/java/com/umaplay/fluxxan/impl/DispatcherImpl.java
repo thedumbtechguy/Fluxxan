@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.umaplay.fluxxan.Action;
+import com.umaplay.fluxxan.DispatchListener;
 import com.umaplay.fluxxan.DispatchResult;
 import com.umaplay.fluxxan.Dispatcher;
 import com.umaplay.fluxxan.Reducer;
@@ -36,7 +37,8 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
     protected Collection<String> mWaitingToDispatch;
-    protected final List<StateListener<State>> mListeners;
+    protected final List<StateListener<State>> mStateListeners;
+    protected final List<DispatchListener<State>> mDispatchListeners;
 
 
     protected boolean isStarted;
@@ -50,7 +52,8 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
      */
     public DispatcherImpl(State state) {
         mState = state;
-        mListeners = Collections.synchronizedList(new ArrayList<StateListener<State>>());
+        mStateListeners = Collections.synchronizedList(new ArrayList<StateListener<State>>());
+        mDispatchListeners = Collections.synchronizedList(new ArrayList<DispatchListener<State>>());
     }
 
     protected void _dispatch(@NonNull final Action action) {
@@ -76,6 +79,8 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
         catch (Exception e) {
             Log.e("DroidFlux:Dispatcher", String.format("[FAILED] dispatch of action [%s]", action.Type), e);
             ex = new RuntimeException(e);
+
+            notifyDispatchListenersOnException(action, e);
         }
         finally {
             mCurrentActionType = null;
@@ -88,6 +93,8 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
 
     protected synchronized void doDispatchLoop(Action action) throws Exception {
         ThreadUtils.ensureNotOnMain();
+
+        notifyDispatchListenersBefore(action, mState);
 
         Reducer<State> dispatch;
         Boolean canBeDispatchedTo;
@@ -137,25 +144,78 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             this.doDispatchLoop(action);
         }
 
+        boolean stateChanged = hasStateChanged(dispatchState, mState);
+
         if (!wasHandled) {
             Log.d(TAG, String.format("An action of type [%s] was dispatched, but no reducer handled it", action.Type));
         }
-        else if(hasStateChanged(dispatchState, mState)){
+        else if(stateChanged){
             State oldstate = mState;
             mState = dispatchState;//update state
 
-            notifyListeners(dispatchState, oldstate);
+            notifyStateListeners(dispatchState, oldstate);
         }
+
+        notifyDispatchListenersAfter(action, mState, stateChanged, wasHandled);
     }
 
-    protected void notifyListeners(State newState, State oldState) {
-        synchronized (mListeners) {
+    protected void notifyStateListeners(State newState, State oldState) {
+        synchronized (mStateListeners) {
             Exception exception = null;
-            for (StateListener<State> listener : mListeners) {
+            for (StateListener<State> listener : mStateListeners) {
                 try {
                     if(listener.hasStateChanged(newState, oldState)) listener.onStateChanged(newState);
                 } catch (Exception e) {
-                    Log.e(TAG, "Unexpected exception during notifyAll", e);
+                    Log.e(TAG, "Unexpected exception during notifyStateListeners", e);
+                    exception = e;//let's save this for after. It might just fuck things up terribly
+                }
+            }
+
+            if(exception != null) throw new RuntimeException(exception);
+        }
+    }
+
+    protected void notifyDispatchListenersBefore(Action action, State currentState) {
+        synchronized (mDispatchListeners) {
+            Exception exception = null;
+            for (DispatchListener<State> listener : mDispatchListeners) {
+                try {
+                    listener.beforeDispatch(action, currentState);
+                } catch (Exception e) {
+                    Log.e(TAG, "Unexpected exception during notifyDispatchListenersBefore", e);
+                    exception = e;//let's save this for after. It might just fuck things up terribly
+                }
+            }
+
+            if(exception != null) throw new RuntimeException(exception);
+        }
+    }
+
+    protected void notifyDispatchListenersOnException(Action action, Exception ex) {
+        synchronized (mDispatchListeners) {
+            Exception exception = null;
+            for (DispatchListener<State> listener : mDispatchListeners) {
+                try {
+                    listener.onDispatchException(action, ex);
+                } catch (Exception e) {
+                    Log.e(TAG, "Unexpected exception during notifyDispatchListenersOnException", e);
+                    exception = e;//let's save this for after. It might just fuck things up terribly
+                }
+            }
+
+            if(exception != null) throw new RuntimeException(exception);
+        }
+    }
+
+    protected void notifyDispatchListenersAfter(Action action, State currentState, Boolean stateChanged, Boolean
+            wasHandled) {
+        synchronized (mDispatchListeners) {
+            Exception exception = null;
+            for (DispatchListener<State> listener : mDispatchListeners) {
+                try {
+                    listener.afterDispatch(action, currentState, stateChanged, wasHandled);
+                } catch (Exception e) {
+                    Log.e(TAG, "Unexpected exception during notifyDispatchListenersAfter", e);
                     exception = e;//let's save this for after. It might just fuck things up terribly
                 }
             }
@@ -257,14 +317,23 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
     }
 
     @Override
-    public boolean addListener(StateListener<State> StateListener) {
-        removeListener(StateListener);
-        return mListeners.add(StateListener);
+    public boolean addListener(StateListener<State> stateListener) {
+        removeListener(stateListener);
+        return mStateListeners.add(stateListener);
     }
 
     @Override
-    public boolean removeListener(StateListener<State> StateListener) {
-        return mListeners.remove(StateListener);
+    public boolean removeListener(StateListener<State> stateListener) {
+        return mStateListeners.remove(stateListener);
+    }
+
+    public boolean addDispatchListener(DispatchListener<State> dispatchListener) {
+        removeDispatchListener(dispatchListener);
+        return mDispatchListeners.add(dispatchListener);
+    }
+
+    public boolean removeDispatchListener(DispatchListener<State> dispatchListener) {
+        return mDispatchListeners.remove(dispatchListener);
     }
 
     /**
