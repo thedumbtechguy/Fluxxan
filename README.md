@@ -10,7 +10,7 @@ I ended up with something that looks like Flux, but works a lot like Redux.
 
 ### Current Version: 1.0.0
 
-Fluxxan follows [Semantic Versionioning](http://semver.org/).
+Fluxxan follows [Semantic Versioning](http://semver.org/).
 
 [![](https://www.bintray.com/docs/images/bintray_badge_color.png)](https://bintray.com/frostymarvelous/maven/fluxxan/view?source=watch)
 
