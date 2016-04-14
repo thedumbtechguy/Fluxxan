@@ -6,10 +6,6 @@ Originally DroidFlux, it started as a direct Android port of the popular [Fluxxo
 The library has evolved into a hybrid of the original Flux and [Redux](https://github.com/reactjs/redux), borrowing some of the great ideas from Redux while trying to be as close to the original dictates of Flux as much as possible. 
 I ended up with something that looks like Flux, but works a lot like Redux.
 
-##Fluxxan4j
-
-If you are looking for a pure java implementation, you can check out [Fluxxan4j](https://github.com/frostymarvelous/Fluxxan4j) which strips out the android dependencies and supports Java 6.
-
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Fluxxan-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786) [![Download](https://api.bintray.com/packages/frostymarvelous/maven/fluxxan/images/download.svg) ](https://bintray.com/frostymarvelous/maven/fluxxan/_latestVersion) 
 
 ### Current Version: 1.0.0
@@ -17,6 +13,10 @@ If you are looking for a pure java implementation, you can check out [Fluxxan4j]
 Fluxxan follows [Semantic Versionioning](http://semver.org/).
 
 [![](https://www.bintray.com/docs/images/bintray_badge_color.png)](https://bintray.com/frostymarvelous/maven/fluxxan/view?source=watch)
+
+### Fluxxan4j
+
+If you are looking for a pure java implementation, you can check out [Fluxxan4j](https://github.com/frostymarvelous/Fluxxan4j) which strips out the android dependencies and supports Java 6.
 
 
 ## Installation
