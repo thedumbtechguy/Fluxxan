@@ -280,6 +280,14 @@ In our app, let's see what this looks like.
     Fluxxan.start();
 ```
 
+### Proguard
+
+For proguard, you will need to add this.
+```proguard
+	-keepclasseswithmembers class * {
+	    @com.umaplay.fluxxan.annotation.BindAction <methods>;
+	}
+```
 
 ### Contributing
 
@@ -289,7 +297,6 @@ But before you do, please read our [contribution guidelines](CONTRIBUTING.MD). T
 
 ###Todo
   - Writing Tests
-  - Specify Proguard rules
 
 	
 ### License
