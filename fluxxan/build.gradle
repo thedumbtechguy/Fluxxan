@@ -22,7 +22,7 @@ ext {
     developerEmail = 'sfroelich01@gmail.com'
 
     licenseName = 'MIT'
-    licenseUrl = 'https://github.com/frostymarvelous/Fluxxan/blob/master/LICENSE.md'
+    licenseUrl = 'https://github.com/frostymarvelous/Fluxxan/blob/master/LICENSE'
     allLicenses = ["MIT"]
 }
 

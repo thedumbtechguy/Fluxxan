@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0-alpha5'
+        classpath 'com.android.tools.build:gradle:2.1.0'
         // add dependency to plugin
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 
@@ -21,4 +21,5 @@ allprojects {
     repositories {
         jcenter()
     }
+    tasks.withType(Javadoc).all { enabled = false }
 }

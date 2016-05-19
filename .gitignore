@@ -1,6 +1,7 @@
 # Built application files
 *.apk
 *.ap_
+!artifacts/fluxxan-demo.apk
 
 # Files for the Dalvik VM
 *.dex
