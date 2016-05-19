@@ -8,6 +8,13 @@ I ended up with something that looks like Flux, but works a lot like Redux.
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Fluxxan-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1786) [![Download](https://api.bintray.com/packages/frostymarvelous/maven/fluxxan/images/download.svg) ](https://bintray.com/frostymarvelous/maven/fluxxan/_latestVersion) 
 
+## Users
+
+Apps using Fluxxan in production 
+
+[![Umaplay](assets/uma_logo.png)](https://play.google.com/store/apps/details?id=com.umaplay.android)
+
+
 ### Current Version: 1.0.0
 
 Fluxxan follows [Semantic Versioning](http://semver.org/).
@@ -21,16 +28,17 @@ If you are looking for a pure java implementation, you can check out [Fluxxan4j]
 
 ## Installation
 
-####Gradle
+#### Gradle
 Fluxxan is available on jcenter.
 
 ```gradle
 compile 'com.umaplay.oss:fluxxan:1.0.0'
 ```
 
-####Manual Installation
+#### Manual Installation
 Download the [aar artifact](artifacts/fluxxan-1.0.0.aar) from the [artifacts](artifacts/) directory
 and copy it into the libs directory of your app module.
+
 Specify `libs` as a repository in your root gradle file.
 ```groovy
     allprojects {
@@ -39,7 +47,8 @@ Specify `libs` as a repository in your root gradle file.
             flatDir { dirs 'libs' }
         }
     }
-```    
+``` 
+   
 Specify Fluxxan as dependency in your app's gradle file.
 ```groovy
     dependencies {
@@ -48,8 +57,9 @@ Specify Fluxxan as dependency in your app's gradle file.
         ...
     }
 ```
-##Introduction
- I won't attempt to teach you the concepts of Flux. There are enough articles on the internet for that. Facebook has a great [introduction to flux here](https://facebook.github.io/flux/docs/overview.html) to get you started.
+
+## Introduction
+ I won't attempt to teach you the concepts of Flux. There are enough articles on the internet for that. Facebook has a great [introduction to flux](https://facebook.github.io/flux/docs/overview.html) to get you started.
  I will instead focus on showing you how to achieve Flux using Fluxxan. In this introduction tutorial, I will walk you through building the sample Todo app included in the source.
 
 Fluxxan is composed of the
@@ -61,7 +71,7 @@ Fluxxan is composed of the
 5. Reducers (called stores in traditional Flux)
 6. StateListeners
 
-####How it works
+#### How it works
 You hold your application state in a single `State` object tree. In order to update the `State`, you tell an `ActionCreator`, which creates and dispatches an `Action` object describing what happened. 
 The `Dispatcher` calls all registered `Reducer`s with the `State` and `Action ` and each `Reducer` specifies how the `Action` transforms the state tree.
 `StateListeners` are passed the returned `State` and update the UI accordingly.
@@ -118,14 +128,14 @@ We also define our `Todo` object as an Immutable.
 ```
  When we build our project, `Immutables` will generate concrete immutable versions of our `AppState` and `Todo` models prefixed with "Immutable" to give `ImmutableAppState` and `ImmutableTodo`.
 
-###Actions
+### Actions
 [Action](fluxxan/src/main/java/com/umaplay/fluxxan/Action.java)s are objects that define a `Type` and a data `Payload`.
 
 The action `Type` is a unique string to identify the given action and the `Payload` is any object that you wish to pass to the `Reducer`.
 
 `Action`s are created by `ActionCreator`s and passed to the `Dispatcher` which in turn passes it to each reducer.
 
-###Action Creators
+### Action Creators
 As the name implies, `Action Creators` are methods that create and dispatch `Actions`. 
 
 >Fluxxan does not dictate how you create your `Action Creators`. You have full freedom in this regard. They can be static methods or instance methods. 
@@ -264,7 +274,7 @@ By default, it uses, `return newState != oldState`.
 
 >The dispatcher allows us to provide the ability for a `Reducer` to wait for other reducers. This is an important feature in Flux not required in Redux. 
 
-####Fluxxan
+#### Fluxxan
 We provide you a coordinator to help manage the dispatcher. It's called `Fluxxan`.
 Fluxxan is used in default implementations so instead of dealing with the `Dispatcher` directly (you can if you choose to) we use `Fluxxan`.
 `Fluxxan` provides proxy methods that call `Dispatcher`. By default, it uses the `DispatcherImpl` implementation.
@@ -287,7 +297,7 @@ Thank you for taking the time to contribute.
 But before you do, please read our [contribution guidelines](CONTRIBUTING.MD). They are simple, we promise.
 
 
-###Todo
+### Todo
   - Writing Tests
   - Specify Proguard rules
 
