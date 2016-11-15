@@ -260,7 +260,7 @@ This design choice was made intentionally to allow you to be able to do any proc
 We have base implementations like `StateListenerActivity`, `StateListenerFragment` and `StateListenerView` that take care of handling the lifecycle and registering and unregistering of the listener.
 
 ###Middlewares
-`Middleware`s [provides a third-party extension point between dispatching an action, and the moment it reaches the reducer](http://redux.js.org/docs/advanced/Middleware.html). 
+`Middlewares` [provides a third-party extension point between dispatching an action, and the moment it reaches the reducer](http://redux.js.org/docs/advanced/Middleware.html). 
 The middlewares represents a good place for logging, crash reporting, talking to an asynchronous API, interact with databases, and more.
 
 To register a `Middleware`, you need to call `Dispatcher.registerMiddleware(Middleware)` and `Dispatcher.unregisterMiddleware(Middleware)` if you wish to remove it.
@@ -271,7 +271,7 @@ We provide one abstract implementations: `BaseMiddleware` coupled to the default
 `BaseMiddleware` requires you to implement `intercept(State, Action)` in which you can check if you want to handle that action `Type`.
 
 ```java
-  public LoggerMiddleware extends BaseMiddleware {
+  public class LoggerMiddleware extends BaseMiddleware {
      @Override
      public void intercept(State state, Action action) throws Exception {
         Log.d("[LoggerMiddleware]", action.Type);
