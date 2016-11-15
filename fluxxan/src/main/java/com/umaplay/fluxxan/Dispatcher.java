@@ -77,6 +77,22 @@ public interface Dispatcher<State> {
     public @Nullable <T extends Reducer<State>> T unregisterReducer(Class<T> reducerClass);
 
     /**
+     * Register a middleware
+     *
+     * @param middleware Middleware to be registered
+     * @return The middleware
+     */
+    public Middleware<State> registerMiddleware(@NonNull Middleware<State> middleware);
+
+    /**
+     * Unregister a middleware
+     *
+     * @param middlewareClass Class of middleware you wish to unregister.
+     * @return The middleware
+     */
+    public @Nullable <T extends Middleware<State>> T unregisterMiddleware(Class<T> middlewareClass);
+
+    /**
      * Add a listener to listen to state changes
      * @param StateListener The listener
      * @return True on success or False on failure

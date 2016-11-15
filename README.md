@@ -70,10 +70,11 @@ Fluxxan is composed of the
 4. Action Creators
 5. Reducers (called stores in traditional Flux)
 6. StateListeners
+7. Middlewares
 
 #### How it works
 You hold your application state in a single `State` object tree. In order to update the `State`, you tell an `ActionCreator`, which creates and dispatches an `Action` object describing what happened. 
-The `Dispatcher` calls all registered `Reducer`s with the `State` and `Action ` and each `Reducer` specifies how the `Action` transforms the state tree.
+The `Dispatcher` calls all registered middlewares in the same registered order to intercept the actions been dispatched and perform async operations. Following the `Dispatcher` calls all registered `Reducer`s with the `State` and `Action ` and each `Reducer` specifies how the `Action` transforms the state tree.
 `StateListeners` are passed the returned `State` and update the UI accordingly.
 
 ### State
@@ -200,7 +201,7 @@ To register a `Reducer`, you need to call `Dispatcher.registerReducer(Reducer)` 
 `Reducer`s implement the [Reducer](fluxxan/src/main/java/com/umaplay/fluxxan/Reducer.java) interface. 
 We provide two abstract implementations: `BaseReducer` and `BaseAnnotatedReducer` both coupled to the default `Dispatcher` implementation.
 
-`BaseReducer` requires you to implement `reduce(State, Action)` in whuch you can check if you want to handle that action `Type`.
+`BaseReducer` requires you to implement `reduce(State, Action)` in which you can check if you want to handle that action `Type`.
 
 ```java
      @Override
@@ -258,6 +259,25 @@ This design choice was made intentionally to allow you to be able to do any proc
 
 We have base implementations like `StateListenerActivity`, `StateListenerFragment` and `StateListenerView` that take care of handling the lifecycle and registering and unregistering of the listener.
 
+###Middlewares
+`Middleware`s [provides a third-party extension point between dispatching an action, and the moment it reaches the reducer](http://redux.js.org/docs/advanced/Middleware.html). 
+The middlewares represents a good place for logging, crash reporting, talking to an asynchronous API, interact with databases, and more.
+
+To register a `Middleware`, you need to call `Dispatcher.registerMiddleware(Middleware)` and `Dispatcher.unregisterMiddleware(Middleware)` if you wish to remove it.
+
+`Middleware`s implement the [Middleware](fluxxan/src/main/java/com/umaplay/fluxxan/Middleware.java) interface. 
+We provide one abstract implementations: `BaseMiddleware` coupled to the default `Dispatcher` implementation.
+
+`BaseMiddleware` requires you to implement `intercept(State, Action)` in which you can check if you want to handle that action `Type`.
+
+```java
+  public LoggerMiddleware extends BaseMiddleware {
+     @Override
+     public void intercept(State state, Action action) throws Exception {
+        Log.d("[LoggerMiddleware]", action.Type);
+     }
+  }
+```
 
 ### Dispatcher
 We saved the best for last.

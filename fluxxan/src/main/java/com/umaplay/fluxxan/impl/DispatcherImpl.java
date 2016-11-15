@@ -1,6 +1,7 @@
 package com.umaplay.fluxxan.impl;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -8,6 +9,7 @@ import com.umaplay.fluxxan.Action;
 import com.umaplay.fluxxan.DispatchListener;
 import com.umaplay.fluxxan.DispatchResult;
 import com.umaplay.fluxxan.Dispatcher;
+import com.umaplay.fluxxan.Middleware;
 import com.umaplay.fluxxan.Reducer;
 import com.umaplay.fluxxan.StateListener;
 import com.umaplay.fluxxan.WaitCallback;
@@ -21,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -34,6 +37,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
     protected State mState;
     protected final LinkedBlockingQueue<Action> mDispatchQueue = new LinkedBlockingQueue<>();
     protected final ConcurrentHashMap<String, Reducer<State>> mReducers = new ConcurrentHashMap<>();
+    protected final ConcurrentLinkedQueue<Middleware<State>> mMiddlewares = new ConcurrentLinkedQueue<>();
     protected AtomicBoolean mIsDispatching = new AtomicBoolean(false);
     protected String mCurrentActionType = null;
     protected Collection<String> mWaitingToDispatch;
@@ -102,6 +106,10 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
         List<String> removeFromDispatchQueue = new ArrayList<>();
         List<String> dispatchedThisLoop = new ArrayList<>();
         State dispatchState = mState;
+
+        for(Middleware<State> middleware : mMiddlewares) {
+           middleware.intercept(mState, action);
+        }
 
         for (String key : mWaitingToDispatch) {
             dispatch = mReducers.get(key);
@@ -314,6 +322,44 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
     @Override
     public <T extends Reducer<State>> T unregisterReducer(Class<T> reducer) {
         return (T) mReducers.remove(reducer.getName());
+    }
+
+    @Override
+    public Middleware<State> registerMiddleware(@NonNull Middleware<State> middleware) {
+        if(isMiddlewareRegistered(middleware)) {
+            throw new IllegalStateException("Can only register one middleware from same class!");
+        }
+        middleware.setDispatcher(this);
+        if(mMiddlewares.offer(middleware)) return middleware;
+        return null;
+    }
+
+    /**
+     * Verify if a middleware is registered
+     *
+     * @param middlewareCheck middleware to be verified
+     * @return true if the middleware is registered or false otherwise.
+     */
+    private boolean isMiddlewareRegistered(Middleware<State> middlewareCheck) {
+        for (Middleware<State> middleware : mMiddlewares) {
+            if(middleware.getClass().equals(middlewareCheck.getClass())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public <T extends Middleware<State>> T unregisterMiddleware(Class<T> middlewareClass) {
+        for (Middleware<State> middleware : mMiddlewares) {
+            if(middleware.getClass().equals(middlewareClass)) {
+                if (mMiddlewares.remove(middleware)) {
+                   return (T) middleware;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
