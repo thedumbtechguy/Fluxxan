@@ -39,3 +39,5 @@ captures/
 .DS_Store
 /build
 
+.idea
+*.iml

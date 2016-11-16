@@ -94,6 +94,20 @@ public class Fluxxan<State> {
     }
 
     /**
+     * @see Dispatcher#registerMiddleware(Middleware)
+     */
+    public Middleware<State> registerMiddleware(@NonNull Middleware<State> middleware) {
+        return mDispatcher.registerMiddleware(middleware);
+    }
+
+    /**
+     * @see Dispatcher#unregisterMiddleware(Class)
+     */
+    public <T extends Middleware<State>> T unregisterMiddleware(Class<T> middlewareClass) {
+        return mDispatcher.unregisterMiddleware(middlewareClass);
+    }
+
+    /**
      * @see Dispatcher#addListener(StateListener)
      */
     public boolean addListener(StateListener<State> stateListener) {

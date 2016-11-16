@@ -6,6 +6,7 @@ import com.umaplay.fluxxan.Dispatcher;
 import com.umaplay.fluxxan.Fluxxan;
 import com.umaplay.fluxxan.impl.DispatcherImpl;
 import com.umaplay.fluxxandemo.flux.actioncreator.TodoActionCreator;
+import com.umaplay.fluxxandemo.flux.middleware.LoggerMiddleware;
 import com.umaplay.fluxxandemo.flux.model.AppState;
 import com.umaplay.fluxxandemo.flux.model.ImmutableAppState;
 import com.umaplay.fluxxandemo.flux.reducer.TodoReducer;
@@ -34,6 +35,7 @@ public class App extends Application {
             }
         };
         Fluxxan.registerReducer(new TodoReducer());
+        Fluxxan.registerMiddleware(new LoggerMiddleware());
 
         Fluxxan.start();
     }
