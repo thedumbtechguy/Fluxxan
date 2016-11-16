@@ -12,7 +12,7 @@ import com.umaplay.fluxxandemo.flux.model.AppState;
 
 public class LoggerMiddleware extends BaseMiddleware<AppState> {
     @Override
-    public void intercept(AppState appState, Action action) throws Exception {
-        Log.d("[LoggerMiddleware", action.Type);
+    public void before(Action action, AppState appState) throws Exception {
+        Log.d("[LoggerMiddleware]", action.Type);
     }
 }

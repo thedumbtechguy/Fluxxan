@@ -108,7 +108,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
         State dispatchState = mState;
 
         for(Middleware<State> middleware : mMiddlewares) {
-           middleware.intercept(mState, action);
+           middleware.before(action, mState);
         }
 
         for (String key : mWaitingToDispatch) {

@@ -1,7 +1,5 @@
 package com.umaplay.fluxxan;
 
-import com.umaplay.fluxxan.impl.BaseActionCreator;
-import com.umaplay.fluxxan.impl.BaseMiddleware;
 import com.umaplay.fluxxan.impl.BaseReducer;
 import com.umaplay.fluxxan.impl.DispatcherImpl;
 
@@ -12,21 +10,15 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -112,7 +104,7 @@ public class DispatcherImplTest {
 
         ArgumentCaptor<Boolean> stateCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Action> actionCaptor = ArgumentCaptor.forClass(Action.class);
-        verify(middleware, times(1)).intercept(stateCaptor.capture(), actionCaptor.capture());
+        verify(middleware, times(1)).before(actionCaptor.capture(), stateCaptor.capture());
 
         assertEquals(action, actionCaptor.getValue());
         assertEquals(false, stateCaptor.getValue());
@@ -141,7 +133,7 @@ public class DispatcherImplTest {
         mDispatcher.unregisterMiddleware(middleware.getClass());
         dispatch(new Action("EMPTY_ACTION"));
 
-        verify(middleware, never()).intercept(anyObject(), any(Action.class));
+        verify(middleware, never()).before(any(Action.class), anyObject());
     }
 
     @Test
