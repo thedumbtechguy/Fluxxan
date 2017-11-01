@@ -388,7 +388,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
      * It will also throw an IllegalArgumentException If reducer is in the Set of reducers to wait on or a specified reducer has not been registered.
      */
     @Override
-    public void waitFor(Class waitingReducer, Set<Class> reducerNames, WaitCallback callback) {
+    public void waitFor(Class waitingReducer, Set<Class> reducerClasses, WaitCallback callback) {
         ThreadUtils.ensureNotOnMain();
 
         String waitingReducerName = waitingReducer.getName();
@@ -397,7 +397,7 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             throw new IllegalStateException("Cannot wait unless an action is being dispatched");
         }
 
-        if (reducerNames.contains(waitingReducer)) {
+        if (reducerClasses.contains(waitingReducer)) {
             throw new IllegalArgumentException("A reducer cannot wait on itself");
         }
 
@@ -407,8 +407,9 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             throw new IllegalStateException(waitingReducerName + " is already waiting on reducers");
         }
 
-        for (Class reducerName1 : reducerNames) {
-            String reducerName = reducerName1.getName();
+        List<String> reducerNames = new ArrayList<>();
+        for (Class reducerClass : reducerClasses) {
+            String reducerName = reducerClass.getName();
 
             if (!mReducers.containsKey(reducerName)) {
                 throw new IllegalArgumentException("Cannot wait for non-existent reducer " + reducerName);
@@ -418,6 +419,8 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             if (reducerDispatch.getWaitingOnList().contains(waitingReducerName)) {
                 throw new IllegalStateException("Circular wait detected between " + waitingReducerName + " and " + reducerName);
             }
+
+            reducerNames.add(reducerName);
         }
 
         dispatch.reset();
