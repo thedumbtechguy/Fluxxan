@@ -7,13 +7,10 @@ import org.immutables.value.Value;
  */
 @Value.Immutable
 public abstract class Todo {
-    @Value
     public abstract String getUid();
 
-    @Value
     public abstract String getTitle();
 
-    @Value
     public abstract Status getStatus();
 
     public enum Status {
