@@ -100,66 +100,67 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
 
         notifyDispatchListenersBefore(action, mState);
 
-        Reducer<State> dispatch;
-        Boolean canBeDispatchedTo;
         Boolean wasHandled = false;
-        List<String> removeFromDispatchQueue = new ArrayList<>();
-        List<String> dispatchedThisLoop = new ArrayList<>();
         State dispatchState = mState;
 
-        for(Middleware<State> middleware : mMiddlewares) {
-           middleware.before(action, mState);
+        for (Middleware<State> middleware : mMiddlewares) {
+            middleware.intercept(mState, action);
         }
 
-        for (String key : mWaitingToDispatch) {
-            dispatch = mReducers.get(key);
-            canBeDispatchedTo = (dispatch.getWaitingOnList().size() == 0) || (CollectionUtils.intersection(dispatch.getWaitingOnList(), new ArrayList<>(mWaitingToDispatch)).size() == 0);
+        while (mWaitingToDispatch.size() > 0) {
+            List<String> removeFromDispatchQueue = new ArrayList<>();
+            List<String> dispatchedThisLoop = new ArrayList<>();
 
-            if (canBeDispatchedTo) {
-                if (dispatch.getWaitCallback() != null) {
-                    WaitCallback fn = dispatch.getWaitCallback();
-                    dispatch.reset();
-                    dispatch.setResolved(true);
-                    fn.call();
-                    wasHandled = true;
-                } else {
-                    dispatch.setResolved(true);
+            for (String key : mWaitingToDispatch) {
+                Reducer<State> dispatch = mReducers.get(key);
+                Boolean canBeDispatchedTo = (dispatch.getWaitingOnList().size() == 0)
+                        || (CollectionUtils.intersection(dispatch.getWaitingOnList(),
+                        new ArrayList<>(mWaitingToDispatch)).size() == 0);
 
-                    DispatchResult<State> result = mReducers.get(key).reduce(dispatchState, action);
-                    dispatchState = result.state;
-
-                    if (result.handled) {
+                if (canBeDispatchedTo) {
+                    if (dispatch.getWaitCallback() != null) {
+                        WaitCallback fn = dispatch.getWaitCallback();
+                        dispatch.reset();
+                        dispatch.setResolved(true);
+                        fn.call();
                         wasHandled = true;
+                    } else {
+                        dispatch.setResolved(true);
+
+                        DispatchResult<State> result = mReducers.get(key).reduce(dispatchState, action);
+                        dispatchState = result.state;
+
+                        if (result.handled) {
+                            wasHandled = true;
+                        }
+                    }
+
+                    dispatchedThisLoop.add(key);
+                    if (dispatch.isResolved()) {
+                        removeFromDispatchQueue.add(key);
                     }
                 }
-
-                dispatchedThisLoop.add(key);
-                if (dispatch.isResolved()) {
-                    removeFromDispatchQueue.add(key);
-                }
             }
-        }
 
-        if (mWaitingToDispatch.size() > 0 && dispatchedThisLoop.size() == 0) {
-            String reducersWithCircularWaits = CollectionUtils.implode(mWaitingToDispatch.iterator());
-            throw new Exception("Indirect circular wait detected among: " + reducersWithCircularWaits);
-        }
+            if (mWaitingToDispatch.size() > 0 && dispatchedThisLoop.size() == 0) {
+                String reducersWithCircularWaits
+                        = CollectionUtils.implode(mWaitingToDispatch.iterator());
+                throw new Exception("Indirect circular wait detected among: "
+                        + reducersWithCircularWaits);
+            }
 
-        for(int i = 0; i < removeFromDispatchQueue.size(); i++)
-            mWaitingToDispatch.remove(removeFromDispatchQueue.get(i));
-
-        if (mWaitingToDispatch.size() > 0) {
-            this.doDispatchLoop(action);
+            for (int i = 0; i < removeFromDispatchQueue.size(); i++)
+                mWaitingToDispatch.remove(removeFromDispatchQueue.get(i));
         }
 
         boolean stateChanged = hasStateChanged(dispatchState, mState);
 
         if (!wasHandled) {
-            Log.d(TAG, String.format("An action of type [%s] was dispatched, but no reducer handled it", action.Type));
-        }
-        else if(stateChanged){
+            Log.d(TAG, String.format("An action of type [%s] was dispatched,"
+                    + " but no reducer handled it", action.Type));
+        } else if (stateChanged) {
             State oldstate = mState;
-            mState = dispatchState;//update state
+            mState = dispatchState; //update state
 
             notifyStateListeners(dispatchState, oldstate);
         }
@@ -383,9 +384,10 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
     }
 
     /**
-     * This will throw an IllegalStateException If a dispatch is not currently running or the reducer is already waiting (nested call possibly)
-     * or a circular wait is detected.
-     * It will also throw an IllegalArgumentException If reducer is in the Set of reducers to wait on or a specified reducer has not been registered.
+     * This will throw an IllegalStateException If a dispatch is not currently running
+     * or the reducer is already waiting (nested call possibly) or a circular wait is detected.
+     * It will also throw an IllegalArgumentException If reducer is in the Set of reducers
+     * to wait on or a specified reducer has not been registered.
      */
     @Override
     public void waitFor(Class waitingReducer, Set<Class> reducerClasses, WaitCallback callback) {
@@ -412,12 +414,14 @@ public class DispatcherImpl<State> implements Dispatcher<State> {
             String reducerName = reducerClass.getName();
 
             if (!mReducers.containsKey(reducerName)) {
-                throw new IllegalArgumentException("Cannot wait for non-existent reducer " + reducerName);
+                throw new IllegalArgumentException("Cannot wait for non-existent reducer "
+                        + reducerName);
             }
 
             Reducer reducerDispatch = mReducers.get(reducerName);
             if (reducerDispatch.getWaitingOnList().contains(waitingReducerName)) {
-                throw new IllegalStateException("Circular wait detected between " + waitingReducerName + " and " + reducerName);
+                throw new IllegalStateException("Circular wait detected between "
+                        + waitingReducerName + " and " + reducerName);
             }
 
             reducerNames.add(reducerName);

@@ -104,7 +104,7 @@ public class DispatcherImplTest {
 
         ArgumentCaptor<Boolean> stateCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Action> actionCaptor = ArgumentCaptor.forClass(Action.class);
-        verify(middleware, times(1)).before(actionCaptor.capture(), stateCaptor.capture());
+        verify(middleware, times(1)).intercept(stateCaptor.capture(), actionCaptor.capture());
 
         assertEquals(action, actionCaptor.getValue());
         assertEquals(false, stateCaptor.getValue());
@@ -133,7 +133,7 @@ public class DispatcherImplTest {
         mDispatcher.unregisterMiddleware(middleware.getClass());
         dispatch(new Action("EMPTY_ACTION"));
 
-        verify(middleware, never()).before(any(Action.class), anyObject());
+        verify(middleware, never()).intercept(anyObject(), any(Action.class));
     }
 
     @Test

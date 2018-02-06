@@ -10,11 +10,11 @@ public interface Middleware<State> {
     /**
      * Intercept the action to been dispatched
      *
-     * @param action The action action
      * @param state The current State tree
+     * @param action The action action
      * @throws Exception
      */
-    public void before(Action action, State state) throws Exception;
+    public void intercept(State state, Action action) throws Exception;
 
     /**
      * A convenience method to inject the dispatcher into the middleware
